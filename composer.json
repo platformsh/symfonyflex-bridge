@@ -1,0 +1,16 @@
+{
+    "name": "platformsh/symfonyflex-bridge",
+    "description": "Bridge library for running Symfony Flex on Platform.sh",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Larry Garfield",
+            "email": "larry@platform.sh"
+        }
+    ],
+    "require": {},
+    "autoload": {
+        "files": ["platformsh-flex-env.php"]
+    }
+}
