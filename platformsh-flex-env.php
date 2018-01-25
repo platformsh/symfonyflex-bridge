@@ -14,7 +14,6 @@ function mapPlatformShEnvironment() : void
 {
 
     $dbRelationshipName = 'database';
-
     // Set the DATABASE_URL for Doctrine, if necessary.
     if (!getenv('DATABASE_URL')) {
         # "mysql://root@127.0.0.1:3306/symfony?charset=utf8mb4&serverVersion=5.7";
@@ -27,9 +26,9 @@ function mapPlatformShEnvironment() : void
                         $endpoint['scheme'], $endpoint['username'], $endpoint['password'],
                         $endpoint['host'], $endpoint['port'],
                         $endpoint['path']);
+                    putenv('DATABASE_URL=' . $dbUrl);
                     break;
                 }
-                putenv('DATABASE_URL=' . $dbUrl);
             }
         }
         else {
