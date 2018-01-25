@@ -8,6 +8,10 @@ Symfony Flex expects all configuration to come in through environment variables 
 
 Simply require this package using Composer.  When Composer's autoload is included this library will be activated and the environment variables set.  As long as that happens before Symfony bootstraps its configuration (which it almost certainly will) everything should work fine with no further user-interaction necessary.
 
+```
+composer require platformsh/symfonyflex-bridge
+```
+
 ## Mappings performed
 
 * If a Platform.sh relationship named `database` is defined, it will be taken as an SQL database and mapped to the `DATABASE_URL` environment variable for Symfony Flex.  (Note: Due to a bug in Doctrine, the code currently assumes MariaDB 10.2 as the service version.  If that Doctrine bug is ever resolved this hard-coding can be removed.)
