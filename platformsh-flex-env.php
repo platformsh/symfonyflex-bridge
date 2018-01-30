@@ -46,4 +46,11 @@ function mapPlatformShEnvironment() : void
     if (!getenv('APP_SECRET') && getenv('PLATFORM_PROJECT_ENTROPY')) {
         putenv('APP_SECRET=' . getenv('PLATFORM_PROJECT_ENTROPY'));
     }
+
+    // Default to production. You can override this value by setting
+    // `env:APP_ENV` as a project variable, or by adding it to the
+    // .platform.app.yaml variables block.
+    if (!getenv('APP_ENV')) {
+        putenv('APP_ENV=prod');
+    }
 }
