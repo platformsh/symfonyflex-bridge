@@ -12,45 +12,71 @@ mapPlatformShEnvironment();
  */
 function mapPlatformShEnvironment() : void
 {
-
-    $dbRelationshipName = 'database';
-    // Set the DATABASE_URL for Doctrine, if necessary.
-    if (!getenv('DATABASE_URL')) {
-        # "mysql://root@127.0.0.1:3306/symfony?charset=utf8mb4&serverVersion=5.7";
-        if (isset($_ENV['PLATFORM_RELATIONSHIPS'])) {
-            $relationships = json_decode(base64_decode(getenv('PLATFORM_RELATIONSHIPS')),true);
-            foreach ($relationships[$dbRelationshipName] as $endpoint) {
-                $dbUrl = '';
-                if (!empty($endpoint['query']['is_master'])) {
-                    $dbUrl = sprintf("%s://%s:%s@%s:%s/%s?charset=utf8mb4&serverVersion=10.2",
-                        $endpoint['scheme'], $endpoint['username'], $endpoint['password'],
-                        $endpoint['host'], $endpoint['port'],
-                        $endpoint['path']);
-                    putenv('DATABASE_URL=' . $dbUrl);
-                    break;
-                }
-            }
-        }
-        else {
-            // Hack the Doctrine URL to be syntactically valid in a build hook, even
-            // though it shouldn't be used.
-            $dbUrl = sprintf("%s://%s:%s@%s:%s/%s?charset=utf8mb4&serverVersion=10.2",
-                'mysql', '', '',
-                'localhost', 3306,
-                '');
-            $_ENV['DATABASE_URL'] = $dbUrl;
-        }
-    }
-
     // Set the application secret if it's not already set.
-    if (!getenv('APP_SECRET') && getenv('PLATFORM_PROJECT_ENTROPY')) {
-        putenv('APP_SECRET=' . getenv('PLATFORM_PROJECT_ENTROPY'));
+    if (!isset($_SERVER['APP_SECRET']) && isset($_SERVER['PLATFORM_PROJECT_ENTROPY'])) {
+        $_SERVER['APP_SECRET'] = $_SERVER['PLATFORM_PROJECT_ENTROPY'];
     }
 
     // Default to production. You can override this value by setting
     // `env:APP_ENV` as a project variable, or by adding it to the
     // .platform.app.yaml variables block.
-    if (!getenv('APP_ENV')) {
-        putenv('APP_ENV=prod');
+    if (!isset($_SERVER['APP_ENV'])) {
+        $_SERVER['APP_ENV'] = 'prod';
     }
+
+    if (isset($_SERVER['DATABASE_URL'])) {
+        return;
+    }
+
+    // Set the DATABASE_URL for Doctrine, if necessary.
+    # "mysql://root@127.0.0.1:3306/symfony?charset=utf8mb4&serverVersion=5.7";
+    if (isset($_SERVER['PLATFORM_RELATIONSHIPS'])) {
+        $relationships = json_decode(base64_decode($_SERVER['PLATFORM_RELATIONSHIPS']), true);
+        foreach ($relationships['database'] as $endpoint) {
+            if (empty($endpoint['query']['is_master'])) {
+                continue;
+            }
+
+            $dbUrl = sprintf(
+                '%s://%s:%s@%s:%d/%s',
+                $endpoint['scheme'],
+                $endpoint['username'],
+                $endpoint['password'],
+                $endpoint['host'],
+                $endpoint['port'],
+                $endpoint['path']
+            );
+
+            switch ($endpoint['scheme']) {
+                case 'mysql':
+                    // Defaults to the latest MariaDB version
+                    $dbUrl .= '?serverVersion=10.2&charset=utf8mb4';
+                    break;
+
+                case 'pgsql':
+                    // Postgres 9.6 is the latest supported version on Platform.sh
+                    $dbUrl .= '?serverVersion=9.6';
+            }
+
+            $_SERVER['DATABASE_URL'] = $dbUrl;
+
+            return;
+        }
+
+        return;
+    }
+
+    // Hack the Doctrine URL to be syntactically valid in a build hook, even
+    // though it shouldn't be used.
+    $dbUrl = sprintf(
+        '%s://%s:%s@%s:%s/%s?charset=utf8mb4&serverVersion=10.2',
+        'mysql',
+        '',
+        '',
+        'localhost',
+        3306,
+        ''
+    );
+
+    $_SERVER['DATABASE_URL'] = $dbUrl;
 }
