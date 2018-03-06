@@ -60,7 +60,7 @@ function mapPlatformShDatabase() : void
                 switch ($endpoint['scheme']) {
                     case 'mysql':
                         // Defaults to the latest MariaDB version
-                        $dbUrl .= '?serverVersion=10.2&charset=utf8mb4';
+                        $dbUrl .= '?charset=utf8mb4&serverVersion=10.2';
                         break;
 
                     case 'pgsql':

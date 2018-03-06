@@ -18,13 +18,15 @@ class FlexBridgeDatabaseTest extends TestCase
 
         $this->relationships = [
             'database' => [
-                'scheme' => 'mysql',
-                'username' => 'user',
-                'password' => '',
-                'host' => 'database.internal',
-                'port' => '3306',
-                'path' => 'main',
-                'query' => ['is_master' => true],
+                [
+                    'scheme' => 'mysql',
+                    'username' => 'user',
+                    'password' => '',
+                    'host' => 'database.internal',
+                    'port' => '3306',
+                    'path' => 'main',
+                    'query' => ['is_master' => true],
+                ]
             ]
         ];
 
@@ -67,11 +69,21 @@ class FlexBridgeDatabaseTest extends TestCase
         $rels = $this->relationships;
         unset($rels['database']);
 
-        putenv(sprintf('PLATFORM_RELATIONSHIPS=%s', base64_encode(json_encode($this->relationships))));
+        putenv(sprintf('PLATFORM_RELATIONSHIPS=%s', base64_encode(json_encode($rels))));
 
         mapPlatformShEnvironment();
 
         $this->assertEquals($this->defaultDbUrl, $_SERVER['DATABASE_URL']);
+    }
+
+    public function testDatabaseRelationshipSet()
+    {
+        putenv('PLATFORM_APPLICATION=test');
+        putenv(sprintf('PLATFORM_RELATIONSHIPS=%s', base64_encode(json_encode($this->relationships))));
+
+        mapPlatformShEnvironment();
+
+        $this->assertEquals('mysql://user:@database.internal:3306/main?charset=utf8mb4&serverVersion=10.2', $_SERVER['DATABASE_URL']);
     }
 
 }
