@@ -25,5 +25,8 @@
     },
     "require-dev": {
         "phpunit/phpunit": "^7.0"
+    },
+    "scripts": {
+        "test": "vendor/bin/phpunit --process-isolation --bootstrap vendor/autoload.php tests/FlexBridgeTest.php"
     }
 }
