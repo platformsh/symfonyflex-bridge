@@ -30,10 +30,13 @@ function mapPlatformShEnvironment() : void
         $_SERVER['APP_ENV'] = 'prod';
     }
 
-    if (isset($_SERVER['DATABASE_URL'])) {
-        return;
+    if (!isset($_SERVER['DATABASE_URL'])) {
+        mapPlatformShDatabase();
     }
+}
 
+function mapPlatformShDatabase() : void
+{
     // Set the DATABASE_URL for Doctrine, if necessary.
     # "mysql://root@127.0.0.1:3306/symfony?charset=utf8mb4&serverVersion=5.7";
     if (isset($_SERVER['PLATFORM_RELATIONSHIPS'])) {
@@ -85,4 +88,5 @@ function mapPlatformShEnvironment() : void
     );
 
     $_SERVER['DATABASE_URL'] = $dbUrl;
+
 }
