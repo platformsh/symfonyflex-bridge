@@ -35,45 +35,43 @@ function mapPlatformShEnvironment() : void
 
 function mapPlatformShDatabase() : void
 {
-
     $dbRelationshipName = 'database';
 
     // Set the DATABASE_URL for Doctrine, if necessary.
     # "mysql://root@127.0.0.1:3306/symfony?charset=utf8mb4&serverVersion=5.7";
     if (getenv('PLATFORM_RELATIONSHIPS')) {
-        $relationships = json_decode(base64_decode(getenv('PLATFORM_RELATIONSHIPS'), true));
-        foreach ($relationships[$dbRelationshipName] as $endpoint) {
-            if (empty($endpoint['query']['is_master'])) {
-                continue;
+        $relationships = json_decode(base64_decode(getenv('PLATFORM_RELATIONSHIPS'), true), true);
+        if (isset($relationships[$dbRelationshipName])) {
+            foreach ($relationships[$dbRelationshipName] as $endpoint) {
+                if (empty($endpoint['query']['is_master'])) {
+                    continue;
+                }
+
+                $dbUrl = sprintf(
+                    '%s://%s:%s@%s:%d/%s',
+                    $endpoint['scheme'],
+                    $endpoint['username'],
+                    $endpoint['password'],
+                    $endpoint['host'],
+                    $endpoint['port'],
+                    $endpoint['path']
+                );
+
+                switch ($endpoint['scheme']) {
+                    case 'mysql':
+                        // Defaults to the latest MariaDB version
+                        $dbUrl .= '?serverVersion=10.2&charset=utf8mb4';
+                        break;
+
+                    case 'pgsql':
+                        // Postgres 9.6 is the latest supported version on Platform.sh
+                        $dbUrl .= '?serverVersion=9.6';
+                }
+
+                $_SERVER['DATABASE_URL'] = $dbUrl;
+                return;
             }
-
-            $dbUrl = sprintf(
-                '%s://%s:%s@%s:%d/%s',
-                $endpoint['scheme'],
-                $endpoint['username'],
-                $endpoint['password'],
-                $endpoint['host'],
-                $endpoint['port'],
-                $endpoint['path']
-            );
-
-            switch ($endpoint['scheme']) {
-                case 'mysql':
-                    // Defaults to the latest MariaDB version
-                    $dbUrl .= '?serverVersion=10.2&charset=utf8mb4';
-                    break;
-
-                case 'pgsql':
-                    // Postgres 9.6 is the latest supported version on Platform.sh
-                    $dbUrl .= '?serverVersion=9.6';
-            }
-
-            $_SERVER['DATABASE_URL'] = $dbUrl;
-
-            return;
         }
-
-        return;
     }
 
     // Hack the Doctrine URL to be syntactically valid in a build hook, even
@@ -89,5 +87,4 @@ function mapPlatformShDatabase() : void
     );
 
     $_SERVER['DATABASE_URL'] = $dbUrl;
-
 }
