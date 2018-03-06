@@ -19,8 +19,8 @@ function mapPlatformShEnvironment() : void
     }
 
     // Set the application secret if it's not already set.
-    if (!isset($_SERVER['APP_SECRET']) && isset($_SERVER['PLATFORM_PROJECT_ENTROPY'])) {
-        $_SERVER['APP_SECRET'] = $_SERVER['PLATFORM_PROJECT_ENTROPY'];
+    if (!isset($_SERVER['APP_SECRET']) && getenv('PLATFORM_PROJECT_ENTROPY')) {
+        $_SERVER['APP_SECRET'] = getenv('PLATFORM_PROJECT_ENTROPY');
     }
 
     // Default to production. You can override this value by setting

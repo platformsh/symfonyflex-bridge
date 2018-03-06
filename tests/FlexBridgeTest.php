@@ -15,4 +15,25 @@ class FlexBridgeTest extends TestCase
         $this->assertFalse(getenv('APP_SECRET'));
     }
 
+    public function testSetAppSecret()
+    {
+        putenv('PLATFORM_APPLICATION=test');
+        putenv('PLATFORM_PROJECT_ENTROPY=test');
+
+        mapPlatformShEnvironment();
+
+        $this->assertEquals('test', $_SERVER['APP_SECRET']);
+    }
+
+    public function testDontChangeAppSecret()
+    {
+        putenv('PLATFORM_APPLICATION=test');
+        putenv('PLATFORM_PROJECT_ENTROPY=test');
+        $_SERVER['APP_SECRET'] = 'original';
+
+        mapPlatformShEnvironment();
+
+        $this->assertEquals('original', $_SERVER['APP_SECRET']);
+    }
+
 }
