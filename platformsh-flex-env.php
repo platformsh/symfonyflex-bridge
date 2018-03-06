@@ -12,6 +12,12 @@ mapPlatformShEnvironment();
  */
 function mapPlatformShEnvironment() : void
 {
+    // If this env var is not set then we're not on a Platform.sh
+    // environment or in the build hook, so don't try to do anything.
+    if (!getenv('PLATFORM_APPLICATION')) {
+        return;
+    }
+
     // Set the application secret if it's not already set.
     if (!isset($_SERVER['APP_SECRET']) && isset($_SERVER['PLATFORM_PROJECT_ENTROPY'])) {
         $_SERVER['APP_SECRET'] = $_SERVER['PLATFORM_PROJECT_ENTROPY'];
