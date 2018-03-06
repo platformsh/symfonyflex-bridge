@@ -8,9 +8,11 @@ use PHPUnit\Framework\TestCase;
 class FlexBridgeTest extends TestCase
 {
 
-    public function testTest()
+    public function testDoesNotRunWithoutPlatformshVariables()
     {
-        $this->assertTrue(true);
+        mapPlatformShEnvironment();
+
+        $this->assertFalse(getenv('APP_SECRET'));
     }
 
 }
