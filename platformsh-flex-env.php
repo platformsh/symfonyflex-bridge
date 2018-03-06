@@ -37,11 +37,14 @@ function mapPlatformShEnvironment() : void
 
 function mapPlatformShDatabase() : void
 {
+
+    $dbRelationshipName = 'database';
+
     // Set the DATABASE_URL for Doctrine, if necessary.
     # "mysql://root@127.0.0.1:3306/symfony?charset=utf8mb4&serverVersion=5.7";
     if (isset($_SERVER['PLATFORM_RELATIONSHIPS'])) {
         $relationships = json_decode(base64_decode($_SERVER['PLATFORM_RELATIONSHIPS']), true);
-        foreach ($relationships['database'] as $endpoint) {
+        foreach ($relationships[$dbRelationshipName] as $endpoint) {
             if (empty($endpoint['query']['is_master'])) {
                 continue;
             }
