@@ -8,14 +8,14 @@ use PHPUnit\Framework\TestCase;
 class FlexBridgeTest extends TestCase
 {
 
-    public function testDoesNotRunWithoutPlatformshVariables()
+    public function testDoesNotRunWithoutPlatformshVariables() : void
     {
         mapPlatformShEnvironment();
 
         $this->assertFalse(getenv('APP_SECRET'));
     }
 
-    public function testSetAppSecret()
+    public function testSetAppSecret() : void
     {
         putenv('PLATFORM_APPLICATION=test');
         putenv('PLATFORM_PROJECT_ENTROPY=test');
@@ -25,7 +25,7 @@ class FlexBridgeTest extends TestCase
         $this->assertEquals('test', $_SERVER['APP_SECRET']);
     }
 
-    public function testDontChangeAppSecret()
+    public function testDontChangeAppSecret() : void
     {
         putenv('PLATFORM_APPLICATION=test');
         putenv('PLATFORM_PROJECT_ENTROPY=test');
@@ -36,7 +36,7 @@ class FlexBridgeTest extends TestCase
         $this->assertEquals('original', $_SERVER['APP_SECRET']);
     }
 
-    public function testAppEnvAlreadySetInServer()
+    public function testAppEnvAlreadySetInServer() : void
     {
         putenv('PLATFORM_APPLICATION=test');
         $_SERVER['APP_ENV'] = 'dev';
@@ -46,7 +46,7 @@ class FlexBridgeTest extends TestCase
         $this->assertEquals('dev', $_SERVER['APP_ENV']);
     }
 
-    public function testAppEnvAlreadySetInEnv()
+    public function testAppEnvAlreadySetInEnv() : void
     {
         putenv('PLATFORM_APPLICATION=test');
         putenv('APP_ENV=dev');
@@ -56,7 +56,7 @@ class FlexBridgeTest extends TestCase
         $this->assertEquals('dev', $_SERVER['APP_ENV']);
     }
 
-    public function testAppEnvNeedsDefault()
+    public function testAppEnvNeedsDefault() : void
     {
         putenv('PLATFORM_APPLICATION=test');
 
