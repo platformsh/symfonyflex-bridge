@@ -17,3 +17,5 @@ composer require platformsh/symfonyflex-bridge
 * If a Platform.sh relationship named `database` is defined, it will be taken as an SQL database and mapped to the `DATABASE_URL` environment variable for Symfony Flex.  (Note: Due to a bug in Doctrine, the code currently assumes MariaDB 10.2 as the service version.  If that Doctrine bug is ever resolved this hard-coding can be removed.)
 
 * The Symfony Flex `APP_SECRET` is set based on the `PLATFORM_PROJECT_ENTROPY` variable, which is provided for exactly this purpose.
+
+* If no `APP_ENV` value is set, it will default to `prod`.
