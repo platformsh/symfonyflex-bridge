@@ -23,6 +23,7 @@ class FlexBridgeTest extends TestCase
         mapPlatformShEnvironment();
 
         $this->assertEquals('test', $_SERVER['APP_SECRET']);
+        $this->assertEquals('test', getenv('APP_SECRET'));
     }
 
     public function testDontChangeAppSecret() : void
@@ -34,6 +35,7 @@ class FlexBridgeTest extends TestCase
         mapPlatformShEnvironment();
 
         $this->assertEquals('original', $_SERVER['APP_SECRET']);
+        $this->assertEquals('original', getenv('APP_SECRET'));
     }
 
     public function testAppEnvAlreadySetInServer() : void
@@ -44,6 +46,7 @@ class FlexBridgeTest extends TestCase
         mapPlatformShEnvironment();
 
         $this->assertEquals('dev', $_SERVER['APP_ENV']);
+        $this->assertEquals('dev', getenv('APP_ENV'));
     }
 
     public function testAppEnvAlreadySetInEnv() : void
@@ -54,6 +57,7 @@ class FlexBridgeTest extends TestCase
         mapPlatformShEnvironment();
 
         $this->assertEquals('dev', $_SERVER['APP_ENV']);
+        $this->assertEquals('dev', getenv('APP_ENV'));
     }
 
     public function testAppEnvNeedsDefault() : void
@@ -63,6 +67,7 @@ class FlexBridgeTest extends TestCase
         mapPlatformShEnvironment();
 
         $this->assertEquals('prod', $_SERVER['APP_ENV']);
+        $this->assertEquals('prod', getenv('APP_ENV'));
     }
 
 }
