@@ -83,7 +83,7 @@ class FlexBridgeDatabaseTest extends TestCase
 
         mapPlatformShEnvironment();
 
-        $this->assertEquals('mysql://user:@database.internal:3306/main?charset=utf8mb4&serverVersion=10.2', $_SERVER['DATABASE_URL']);
+        $this->assertEquals('mysql://user:@database.internal:3306/main?charset=utf8mb4&serverVersion=mariadb-10.2.12', $_SERVER['DATABASE_URL']);
     }
 
 }
