@@ -28,10 +28,10 @@ function mapPlatformShEnvironment() : void
     // Default to production. You can override this value by setting
     // `env:APP_ENV` as a project variable, or by adding it to the
     // .platform.app.yaml variables block.
-    $appEnv = $_SERVER['APP_ENV'] ?? getenv('APP_ENV') ?: 'prod';
+    $appEnv = getenv('APP_ENV') ?: 'prod';
     setEnvVar('APP_ENV', $appEnv);
 
-    if (!isset($_SERVER['DATABASE_URL'])) {
+    if (!getenv('DATABASE_URL')) {
         mapPlatformShDatabase();
     }
 }
