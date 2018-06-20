@@ -19,17 +19,42 @@ function mapPlatformShEnvironment() : void
     }
 
     // Set the application secret if it's not already set.
-    if (!isset($_SERVER['APP_SECRET']) && getenv('PLATFORM_PROJECT_ENTROPY')) {
-        $_SERVER['APP_SECRET'] = getenv('PLATFORM_PROJECT_ENTROPY');
-    }
+    $secret = getenv('APP_SECRET') ?: getenv('PLATFORM_PROJECT_ENTROPY') ?: null;
+    setEnvVar('APP_SECRET', $secret);
 
     // Default to production. You can override this value by setting
     // `env:APP_ENV` as a project variable, or by adding it to the
     // .platform.app.yaml variables block.
-    $_SERVER['APP_ENV'] = $_SERVER['APP_ENV'] ?? (getenv('APP_ENV') ?: null) ?? 'prod';
+    $appEnv = getenv('APP_ENV') ?: 'prod';
+    setEnvVar('APP_ENV', $appEnv);
 
-    if (!isset($_SERVER['DATABASE_URL'])) {
+    if (!getenv('DATABASE_URL')) {
         mapPlatformShDatabase();
+    }
+}
+
+/**
+ * Sets an environment variable in all the myriad places PHP can store it.
+ *
+ * @param string $name
+ *   The name of the variable to set.
+ * @param null|string $value
+ *   The value to set.  Null to unset it.
+ */
+function setEnvVar(string $name, ?string $value) : void
+{
+    if (!putenv("$name=$value")) {
+        throw new \RuntimeException('Failed to create environment variable: ' . $name);
+    }
+    $order = ini_get('variables_order');
+    if (stripos($order, 'e') !== false) {
+        $_ENV[$name] = $value;
+    }
+    if (stripos($order, 's') !== false) {
+        if (strpos($name, 'HTTP_') !== false) {
+            throw new \RuntimeException('Refusing to add ambiguous environment variable ' . $name . ' to $_SERVER');
+        }
+        $_SERVER[$name] = $value;
     }
 }
 
@@ -68,7 +93,7 @@ function mapPlatformShDatabase() : void
                         $dbUrl .= '?serverVersion=9.6';
                 }
 
-                $_SERVER['DATABASE_URL'] = $dbUrl;
+                setEnvVar('DATABASE_URL', $dbUrl);
                 return;
             }
         }
@@ -86,5 +111,5 @@ function mapPlatformShDatabase() : void
         ''
     );
 
-    $_SERVER['DATABASE_URL'] = $dbUrl;
+    setEnvVar('DATABASE_URL', $dbUrl);
 }
