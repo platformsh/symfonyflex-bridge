@@ -30,7 +30,7 @@ class FlexBridgeTest extends TestCase
     {
         putenv('PLATFORM_APPLICATION=test');
         putenv('PLATFORM_PROJECT_ENTROPY=test');
-        $_SERVER['APP_SECRET'] = 'original';
+        putenv('APP_SECRET=original');
 
         mapPlatformShEnvironment();
 

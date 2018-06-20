@@ -22,16 +22,14 @@ function mapPlatformShEnvironment() : void
     // why we have all these extra ternaries.
 
     // Set the application secret if it's not already set.
-    $secret = (getenv('APP_SECRET') ?: null)
-        ?? $_SERVER['APP_SECRET']
-        ?? (getenv('PLATFORM_PROJECT_ENTROPY') ?: null)
-    ;
+    $secret = getenv('APP_SECRET') ?: getenv('PLATFORM_PROJECT_ENTROPY') ?: null;
     setEnvVar('APP_SECRET', $secret);
 
     // Default to production. You can override this value by setting
     // `env:APP_ENV` as a project variable, or by adding it to the
     // .platform.app.yaml variables block.
-    setEnvVar('APP_ENV', $_SERVER['APP_ENV'] ?? (getenv('APP_ENV') ?: null) ?? 'prod');
+    $appEnv = $_SERVER['APP_ENV'] ?? getenv('APP_ENV') ?: 'prod';
+    setEnvVar('APP_ENV', $appEnv);
 
     if (!isset($_SERVER['DATABASE_URL'])) {
         mapPlatformShDatabase();
