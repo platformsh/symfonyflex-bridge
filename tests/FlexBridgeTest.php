@@ -41,7 +41,7 @@ class FlexBridgeTest extends TestCase
     public function testAppEnvAlreadySetInServer() : void
     {
         putenv('PLATFORM_APPLICATION=test');
-        $_SERVER['APP_ENV'] = 'dev';
+        putenv('APP_ENV=dev');
 
         mapPlatformShEnvironment();
 
