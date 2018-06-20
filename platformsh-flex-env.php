@@ -18,9 +18,6 @@ function mapPlatformShEnvironment() : void
         return;
     }
 
-    // getenv() returns false, not null, because getenv() is dumb. That's
-    // why we have all these extra ternaries.
-
     // Set the application secret if it's not already set.
     $secret = getenv('APP_SECRET') ?: getenv('PLATFORM_PROJECT_ENTROPY') ?: null;
     setEnvVar('APP_SECRET', $secret);
