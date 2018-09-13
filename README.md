@@ -18,4 +18,6 @@ composer require platformsh/symfonyflex-bridge
 
 * The Symfony Flex `APP_SECRET` is set based on the `PLATFORM_PROJECT_ENTROPY` variable, which is provided for exactly this purpose.
 
+* The `MAILER_URL` variable is set based on the `PLATFORM_SMTP_HOST` variable.  That will be used by SwiftMailer if it is installed.  If not installed this value will be safely ignored.
+
 * If no `APP_ENV` value is set, it will default to `prod`.
