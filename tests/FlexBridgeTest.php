@@ -72,9 +72,10 @@ class FlexBridgeTest extends TestCase
 
     public function testSwiftmailer() : void
     {
+        putenv('PLATFORM_APPLICATION=test');
         putenv('PLATFORM_SMTP_HOST=1.2.3.4');
 
-        mapPlatformShSwiftmailer();
+        mapPlatformShEnvironment();
 
         $this->assertEquals('smtp://1.2.3.4:25/', $_SERVER['MAILER_URL']);
         $this->assertEquals('smtp://1.2.3.4:25/', getenv('MAILER_URL'));

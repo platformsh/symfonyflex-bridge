@@ -29,10 +29,10 @@ function mapPlatformShEnvironment() : void
     setEnvVar('APP_ENV', $appEnv);
 
     if (!getenv('DATABASE_URL')) {
-        mapPlatformShDatabase();
+        setEnvVar('DATABASE_URL', mapPlatformShDatabase());
     }
     if (!getenv('MAILER_URL')) {
-        mapPlatformShSwiftmailer();
+        setEnvVar('MAILER_URL', mapPlatformShSwiftmailer());
     }
 }
 
@@ -61,7 +61,7 @@ function setEnvVar(string $name, ?string $value) : void
     }
 }
 
-function mapPlatformShSwiftmailer() : void
+function mapPlatformShSwiftmailer() : string
 {
     $mailUrl = sprintf(
         '%s://%s:%d/',
@@ -70,10 +70,10 @@ function mapPlatformShSwiftmailer() : void
         25
     );
 
-    setEnvVar('MAILER_URL', $mailUrl);
+    return $mailUrl;
 }
 
-function mapPlatformShDatabase() : void
+function mapPlatformShDatabase() : string
 {
     $dbRelationshipName = 'database';
 
@@ -108,8 +108,7 @@ function mapPlatformShDatabase() : void
                         $dbUrl .= '?serverVersion=9.6';
                 }
 
-                setEnvVar('DATABASE_URL', $dbUrl);
-                return;
+                return $dbUrl;
             }
         }
     }
@@ -126,5 +125,5 @@ function mapPlatformShDatabase() : void
         ''
     );
 
-    setEnvVar('DATABASE_URL', $dbUrl);
+    return $dbUrl;
 }
