@@ -31,6 +31,9 @@ function mapPlatformShEnvironment() : void
     if (!getenv('DATABASE_URL')) {
         mapPlatformShDatabase();
     }
+    if (!getenv('MAILER_URL')) {
+        mapPlatformShSwiftmailer();
+    }
 }
 
 /**
@@ -56,6 +59,18 @@ function setEnvVar(string $name, ?string $value) : void
         }
         $_SERVER[$name] = $value;
     }
+}
+
+function mapPlatformShSwiftmailer() : void
+{
+    $mailUrl = sprintf(
+        '%s://%s:%d/',
+        'smtp',
+        getenv('PLATFORM_SMTP_HOST'),
+        25
+    );
+
+    setEnvVar('MAILER_URL', $mailUrl);
 }
 
 function mapPlatformShDatabase() : void
