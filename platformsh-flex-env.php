@@ -96,16 +96,30 @@ function mapPlatformShDatabase() : string
                     $endpoint['port'],
                     $endpoint['path']
                 );
+                
+                $guessedVersion = strpos($endpoint['type'], ":");
 
                 switch ($endpoint['scheme']) {
                     case 'mysql':
-                        // Defaults to the latest MariaDB version
-                        $dbUrl .= '?charset=utf8mb4&serverVersion=mariadb-10.2.12';
-                        break;
+                         // If version is found, use it, otherwise, default to mariadb 10.2
+                        $dbVersion = (false !== $guessedVersion) ? substr($endpoint['type'], $guessedVersion + 1) : '10.2';
 
+                        // doctrine needs the mariadb-prefix if it's an instance of MariaDB server
+                        if ($dbVersion !== '5.5') {
+                            $dbVersion = sprintf('mariadb-%s', $dbVersion);
+                        }
+
+                        // if MariaDB is in version 10.2, doctrine needs to know it's superior to patch version 6 to work properly
+                        if ($dbVersion === 'mariadb-10.2') {
+                            $dbVersion = sprintf('%s.12', $dbVersion);
+                        }   
+                        
+                        $dbUrl .= sprintf('?charset=utf8mb4&serverVersion=%s', $dbVersion);
+                        break;
                     case 'pgsql':
-                        // Postgres 9.6 is the latest supported version on Platform.sh
-                        $dbUrl .= '?serverVersion=9.6';
+                        $dbVersion = (false !== $guessedVersion) ? substr($endpoint['type'], $guessedVersion + 1) : '11';
+                        $dbUrl .= sprintf('?serverVersion=%s', $dbVersion);
+                        break;
                 }
 
                 return $dbUrl;
@@ -116,13 +130,14 @@ function mapPlatformShDatabase() : string
     // Hack the Doctrine URL to be syntactically valid in a build hook, even
     // though it shouldn't be used.
     $dbUrl = sprintf(
-        '%s://%s:%s@%s:%s/%s?charset=utf8mb4&serverVersion=10.2',
+        '%s://%s:%s@%s:%s/%s?charset=utf8mb4&serverVersion=%s',
         'mysql',
         '',
         '',
         'localhost',
         3306,
-        ''
+        '',
+        $dbVersion ?? 'mariadb-10.2.12'
     );
 
     return $dbUrl;

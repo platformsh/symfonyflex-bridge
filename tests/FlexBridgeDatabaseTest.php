@@ -7,9 +7,7 @@ use PHPUnit\Framework\TestCase;
 
 class FlexBridgeDatabaseTest extends TestCase
 {
-
     protected $relationships;
-
     protected $defaultDbUrl;
 
     public function setUp()
@@ -26,12 +24,13 @@ class FlexBridgeDatabaseTest extends TestCase
                     'port' => '3306',
                     'path' => 'main',
                     'query' => ['is_master' => true],
+                    'type' => 'mysql:10.2'
                 ]
             ]
         ];
 
         $this->defaultDbUrl = sprintf(
-            '%s://%s:%s@%s:%s/%s?charset=utf8mb4&serverVersion=10.2',
+            '%s://%s:%s@%s:%s/%s?charset=utf8mb4&serverVersion=mariadb-10.2.12',
             'mysql',
             '',
             '',
@@ -82,7 +81,6 @@ class FlexBridgeDatabaseTest extends TestCase
         putenv(sprintf('PLATFORM_RELATIONSHIPS=%s', base64_encode(json_encode($this->relationships))));
 
         mapPlatformShEnvironment();
-
         $this->assertEquals('mysql://user:@database.internal:3306/main?charset=utf8mb4&serverVersion=mariadb-10.2.12', $_SERVER['DATABASE_URL']);
     }
 
