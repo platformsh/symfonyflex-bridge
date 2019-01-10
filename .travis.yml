@@ -1,0 +1,15 @@
+language: php
+php:
+    - '7.1'
+    - '7.2'
+
+## Cache composer
+cache:
+    directories:
+        - $HOME/.composer/cache
+
+before_script:
+    - travis_retry composer update ${COMPOSER_FLAGS} --no-interaction --prefer-dist
+
+script:
+    - vendor/bin/phpunit --coverage-text --coverage-clover=coverage.clover
