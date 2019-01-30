@@ -37,6 +37,9 @@ function mapPlatformShEnvironment() : void
     if (!getenv('DATABASE_URL')) {
         setEnvVar('DATABASE_URL', mapPlatformShDatabase());
     }
+    if (!getenv('MONGO_SERVER')) {
+        mapPlatformShMongoDatabase();
+    }
     if (!getenv('MAILER_URL')) {
         setEnvVar('MAILER_URL', mapPlatformShSwiftmailer());
     }
@@ -119,8 +122,8 @@ function mapPlatformShDatabase() : string
                         // if MariaDB is in version 10.2, doctrine needs to know it's superior to patch version 6 to work properly
                         if ($dbVersion === 'mariadb-10.2') {
                             $dbVersion = sprintf('%s.12', $dbVersion);
-                        }   
-                        
+                        }
+
                         $dbUrl .= sprintf('?charset=utf8mb4&serverVersion=%s', $dbVersion);
                         break;
                     case 'pgsql':
@@ -151,4 +154,38 @@ function mapPlatformShDatabase() : string
     );
 
     return $dbUrl;
+}
+
+/**
+ * Set the MONGODB_SERVER, MONGODB_DB, MONGODB_USERNAME, and MONGODB_PASSWORD for Doctrine, if necessary.
+ * Usage of the full dsn string is NOT working with doctrine-odm-bundle, that's why
+ * we need those 4 env variables.
+ *
+ * Here is a example of the related doctrine-odm-bundle:
+ * doctrine_mongodb:
+ *     connections:
+ *         default:
+ *             server: '%env(MONGODB_SERVER)%'
+ *             options: { username: '%env(MONGODB_USERNAME)%', password: '%env(MONGODB_PASSWORD)%', authSource: '%env(MONGODB_DB)%' }
+ *     default_database: '%env(MONGODB_DB)%'
+ *
+ * For more information: https://symfony.com/doc/master/bundles/DoctrineMongoDBBundle/index.html
+ */
+function mapPlatformShMongoDatabase(): void
+{
+    $dbRelationshipName = 'mongodatabase';
+
+    if (getenv('PLATFORM_RELATIONSHIPS')) {
+        $relationships = json_decode(base64_decode(getenv('PLATFORM_RELATIONSHIPS'), true), true);
+        if (isset($relationships[$dbRelationshipName])) {
+            foreach ($relationships[$dbRelationshipName] as $endpoint) {
+                if (!empty($endpoint['query']['is_master'])) {
+                    setEnvVar('MONGODB_SERVER', sprintf('mongodb://%s:%d', $endpoint['host'], $endpoint['port']));
+                    setEnvVar('MONGODB_DB', $endpoint['path']);
+                    setEnvVar('MONGODB_USERNAME', $endpoint['username']);
+                    setEnvVar('MONGODB_PASSWORD', $endpoint['password']);
+                }
+            }
+        }
+    }
 }
