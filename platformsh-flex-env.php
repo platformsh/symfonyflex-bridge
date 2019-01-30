@@ -96,13 +96,14 @@ function mapPlatformShDatabase() : string
                     $endpoint['port'],
                     $endpoint['path']
                 );
-                
-                $guessedVersion = strpos($endpoint['type'], ":");
 
                 switch ($endpoint['scheme']) {
                     case 'mysql':
+                        $type = $endpoint['type'] ?? 'mysql:10.2';
+                        $versionPosition = strpos($type, ":");
+
                          // If version is found, use it, otherwise, default to mariadb 10.2
-                        $dbVersion = (false !== $guessedVersion) ? substr($endpoint['type'], $guessedVersion + 1) : '10.2';
+                        $dbVersion = (false !== $versionPosition) ? substr($type, $versionPosition + 1) : '10.2';
 
                         // doctrine needs the mariadb-prefix if it's an instance of MariaDB server
                         if ($dbVersion !== '5.5') {
@@ -117,7 +118,10 @@ function mapPlatformShDatabase() : string
                         $dbUrl .= sprintf('?charset=utf8mb4&serverVersion=%s', $dbVersion);
                         break;
                     case 'pgsql':
-                        $dbVersion = (false !== $guessedVersion) ? substr($endpoint['type'], $guessedVersion + 1) : '11';
+                        $type = $endpoint['type'] ?? 'postgresql:9.6';
+                        $versionPosition = strpos($type, ":");
+
+                        $dbVersion = (false !== $versionPosition) ? substr($type, $versionPosition + 1) : '11';
                         $dbUrl .= sprintf('?serverVersion=%s', $dbVersion);
                         break;
                 }
