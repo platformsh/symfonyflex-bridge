@@ -5,6 +5,8 @@ namespace Platformsh\FlexBridge\Tests;
 
 use PHPUnit\Framework\TestCase;
 
+use function Platformsh\FlexBridge\mapPlatformShEnvironment;
+
 class FlexBridgeDatabaseTest extends TestCase
 {
     protected $relationships;
@@ -81,6 +83,22 @@ class FlexBridgeDatabaseTest extends TestCase
         putenv(sprintf('PLATFORM_RELATIONSHIPS=%s', base64_encode(json_encode($this->relationships))));
 
         mapPlatformShEnvironment();
+        $this->assertEquals('mysql://user:@database.internal:3306/main?charset=utf8mb4&serverVersion=mariadb-10.2.12', $_SERVER['DATABASE_URL']);
+    }
+
+    public function testDatabaseRelationshipOnFoundation1() : void
+    {
+        putenv('PLATFORM_APPLICATION=test');
+
+        $rels = $this->relationships;
+
+        // On Foundation 1 regions there is no `type` key, so make sure nothing dies.
+        unset($rels['database'][0]['type']);
+
+        putenv(sprintf('PLATFORM_RELATIONSHIPS=%s', base64_encode(json_encode($rels))));
+
+        mapPlatformShEnvironment();
+
         $this->assertEquals('mysql://user:@database.internal:3306/main?charset=utf8mb4&serverVersion=mariadb-10.2.12', $_SERVER['DATABASE_URL']);
     }
 

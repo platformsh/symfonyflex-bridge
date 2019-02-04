@@ -5,6 +5,8 @@ namespace Platformsh\FlexBridge\Tests;
 
 use PHPUnit\Framework\TestCase;
 
+use function Platformsh\FlexBridge\mapPlatformShEnvironment;
+
 class FlexBridgeTest extends TestCase
 {
 
