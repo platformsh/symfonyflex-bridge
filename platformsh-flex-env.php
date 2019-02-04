@@ -4,6 +4,9 @@ declare(strict_types=1);
 
 namespace Platformsh\FlexBridge;
 
+const DEFAULT_MYSQL_ENDPOINT_TYPE = 'mysql:10.2';
+
+const DEFAULT_POSTGRESQL_ENDPOINT_TYPE = 'postgresql:9.6';
 
 mapPlatformShEnvironment();
 
@@ -102,7 +105,7 @@ function mapPlatformShDatabase() : string
 
                 switch ($endpoint['scheme']) {
                     case 'mysql':
-                        $type = $endpoint['type'] ?? 'mysql:10.2';
+                        $type = $endpoint['type'] ?? DEFAULT_MYSQL_ENDPOINT_TYPE;
                         $versionPosition = strpos($type, ":");
 
                          // If version is found, use it, otherwise, default to mariadb 10.2
@@ -121,7 +124,7 @@ function mapPlatformShDatabase() : string
                         $dbUrl .= sprintf('?charset=utf8mb4&serverVersion=%s', $dbVersion);
                         break;
                     case 'pgsql':
-                        $type = $endpoint['type'] ?? 'postgresql:9.6';
+                        $type = $endpoint['type'] ?? DEFAULT_POSTGRESQL_ENDPOINT_TYPE;
                         $versionPosition = strpos($type, ":");
 
                         $dbVersion = (false !== $versionPosition) ? substr($type, $versionPosition + 1) : '11';
