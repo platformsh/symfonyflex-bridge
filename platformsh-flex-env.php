@@ -30,6 +30,8 @@ function mapPlatformShEnvironment() : void
         return;
     }
 
+    $config->registerFormatter('doctrine', __NAMESPACE__ . '\doctrineFormatter');
+
     // Set the application secret if it's not already set.
     // We force re-setting the APP_SECRET to ensure it's set in all of PHP's various
     // environment places.
@@ -42,8 +44,8 @@ function mapPlatformShEnvironment() : void
     $appEnv = getenv('APP_ENV') ?: 'prod';
     setEnvVar('APP_ENV', $appEnv);
 
+    // Map services as feasible.
     mapPlatformShDatabase('database', $config);
-
     mapPlatformShMongoDatabase('mongodatabase', $config);
 
     // Set the Swiftmailer configuration if it's not set already.
@@ -106,17 +108,17 @@ function doctrineFormatter(array $credentials) : string
             $type = $credentials['type'] ?? DEFAULT_MYSQL_ENDPOINT_TYPE;
             $versionPosition = strpos($type, ":");
 
-            // If version is found, use it, otherwise, default to mariadb 10.2
+            // If a version is found, use it, otherwise, default to mariadb 10.2.
             $dbVersion = (false !== $versionPosition) ? substr($type, $versionPosition + 1) : '10.2';
 
-            // doctrine needs the mariadb-prefix if it's an instance of MariaDB server
+            // Doctrine needs the mariadb-prefix if it's an instance of MariaDB server
             if ($dbVersion !== '5.5') {
                 $dbVersion = sprintf('mariadb-%s', $dbVersion);
             }
 
             // if MariaDB is in version 10.2, doctrine needs to know it's superior to patch version 6 to work properly
             if ($dbVersion === 'mariadb-10.2') {
-                $dbVersion = sprintf('%s.12', $dbVersion);
+                $dbVersion .= '.12';
             }
 
             $dbUrl .= sprintf('?charset=utf8mb4&serverVersion=%s', $dbVersion);
@@ -134,17 +136,30 @@ function doctrineFormatter(array $credentials) : string
 
 }
 
+/**
+ * Maps the specified relationship to the DATABASE_URL environment variable, if available.
+ *
+ * @param string $relationshipName
+ *   The database relationship name.
+ * @param Config $config
+ *   The config object.
+ */
 function mapPlatformShDatabase(string $relationshipName, Config $config) : void
 {
     if (!$config->hasRelationship($relationshipName)) {
         return;
     }
 
-    $config->registerFormatter('doctrine', __NAMESPACE__ . '\doctrineFormatter');
-
     setEnvVar('DATABASE_URL', $config->formattedCredentials($relationshipName, 'doctrine'));
 }
 
+/**
+ * Sets a default Doctrine URL.
+ *
+ * Doctrine needs a well-formed URL string with a database version even in the build hook.
+ * It doesn't use it, but it fails if it's not there.  This default meets the minimum
+ * requirements of the format without actually allowing a connection.
+ */
 function setDefaultDoctrineUrl() : void
 {
     // Hack the Doctrine URL to be syntactically valid in a build hook, even
@@ -157,18 +172,18 @@ function setDefaultDoctrineUrl() : void
         'localhost',
         3306,
         '',
-        $dbVersion ?? 'mariadb-10.2.12'
+        'mariadb-10.2.12'
     );
 
     setEnvVar('DATABASE_URL', $dbUrl);
 }
 
 /**
- * Set the MONGODB_SERVER, MONGODB_DB, MONGODB_USERNAME, and MONGODB_PASSWORD for Doctrine, if necessary.
- * Usage of the full dsn string is NOT working with doctrine-odm-bundle, that's why
- * we need those 4 env variables.
+ * Maps the specified relationship to a Doctrine MongoDB connection, if available.
  *
- * Here is a example of the related doctrine-odm-bundle:
+ * MongoDB ODM uses a set of discrete environment variables rather than a single DB URL string
+ * as in Doctrine ORM.  The related doctrine-odm-bundle settings should be:
+ *
  * doctrine_mongodb:
  *     connections:
  *         default:
@@ -176,7 +191,12 @@ function setDefaultDoctrineUrl() : void
  *             options: { username: '%env(MONGODB_USERNAME)%', password: '%env(MONGODB_PASSWORD)%', authSource: '%env(MONGODB_DB)%' }
  *     default_database: '%env(MONGODB_DB)%'
  *
- * For more information: https://symfony.com/doc/master/bundles/DoctrineMongoDBBundle/index.html
+ * @see https://symfony.com/doc/master/bundles/DoctrineMongoDBBundle/index.html
+ *
+ * @param string $relationshipName
+ *   The MongoDB database relationship name.
+ * @param Config $config
+ *   The config object.
  */
 function mapPlatformShMongoDatabase(string $relationshipName, Config $config): void
 {
