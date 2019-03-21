@@ -46,7 +46,8 @@ class FlexBridgeMongoDatabaseTest extends TestCase
 
     public function testNoDatabaseRelationship(): void
     {
-        putenv('PLATFORM_APPLICATION=test');
+        putenv('PLATFORM_APPLICATION_NAME=test');
+        putenv('PLATFORM_ENVIRONMENT=test');
 
         $rels = $this->relationships;
         unset($rels['mongodatabase']);
@@ -63,7 +64,8 @@ class FlexBridgeMongoDatabaseTest extends TestCase
 
     public function testDatabaseRelationshipSet(): void
     {
-        putenv('PLATFORM_APPLICATION=test');
+        putenv('PLATFORM_APPLICATION_NAME=test');
+        putenv('PLATFORM_ENVIRONMENT=test');
         putenv(sprintf('PLATFORM_RELATIONSHIPS=%s', base64_encode(json_encode($this->relationships))));
 
         mapPlatformShEnvironment();

@@ -51,10 +51,9 @@ class FlexBridgeDatabaseTest extends TestCase
 
     public function testNoRelationships() : void
     {
-        // We assume no relationships array, but a PLATFORM_APPLICATION env var,
-        // means we're in a build hook.
+        // Application name but no environment name means build hook.
 
-        putenv('PLATFORM_APPLICATION=test');
+        putenv('PLATFORM_APPLICATION_NAME=test');
 
         //putenv(sprintf('PLATFORM_RELATIONSHIPS=%s', base64_encode(json_encode($this->relationships))));
 
@@ -65,7 +64,8 @@ class FlexBridgeDatabaseTest extends TestCase
 
     public function testNoDatabaseRelationship() : void
     {
-        putenv('PLATFORM_APPLICATION=test');
+        putenv('PLATFORM_APPLICATION_NAME=test');
+        putenv('PLATFORM_ENVIRONMENT=test');
 
         $rels = $this->relationships;
         unset($rels['database']);
@@ -79,7 +79,8 @@ class FlexBridgeDatabaseTest extends TestCase
 
     public function testDatabaseRelationshipSet() : void
     {
-        putenv('PLATFORM_APPLICATION=test');
+        putenv('PLATFORM_APPLICATION_NAME=test');
+        putenv('PLATFORM_ENVIRONMENT=test');
         putenv(sprintf('PLATFORM_RELATIONSHIPS=%s', base64_encode(json_encode($this->relationships))));
 
         mapPlatformShEnvironment();
@@ -88,7 +89,8 @@ class FlexBridgeDatabaseTest extends TestCase
 
     public function testDatabaseRelationshipOnFoundation1() : void
     {
-        putenv('PLATFORM_APPLICATION=test');
+        putenv('PLATFORM_APPLICATION_NAME=test');
+        putenv('PLATFORM_ENVIRONMENT=test');
 
         $rels = $this->relationships;
 

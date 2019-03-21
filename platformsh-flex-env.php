@@ -20,7 +20,7 @@ function mapPlatformShEnvironment() : void
 {
     // If this env var is not set then we're not on a Platform.sh
     // environment or in the build hook, so don't try to do anything.
-    if (!getenv('PLATFORM_APPLICATION')) {
+    if (!getenv('PLATFORM_APPLICATION_NAME')) {
         return;
     }
 

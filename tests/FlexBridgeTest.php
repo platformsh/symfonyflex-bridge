@@ -19,7 +19,8 @@ class FlexBridgeTest extends TestCase
 
     public function testSetAppSecret() : void
     {
-        putenv('PLATFORM_APPLICATION=test');
+        putenv('PLATFORM_APPLICATION_NAME=test');
+        putenv('PLATFORM_ENVIRONMENT=test');
         putenv('PLATFORM_PROJECT_ENTROPY=test');
 
         mapPlatformShEnvironment();
@@ -30,7 +31,8 @@ class FlexBridgeTest extends TestCase
 
     public function testDontChangeAppSecret() : void
     {
-        putenv('PLATFORM_APPLICATION=test');
+        putenv('PLATFORM_APPLICATION_NAME=test');
+        putenv('PLATFORM_ENVIRONMENT=test');
         putenv('PLATFORM_PROJECT_ENTROPY=test');
         putenv('APP_SECRET=original');
 
@@ -42,7 +44,8 @@ class FlexBridgeTest extends TestCase
 
     public function testAppEnvAlreadySetInServer() : void
     {
-        putenv('PLATFORM_APPLICATION=test');
+        putenv('PLATFORM_APPLICATION_NAME=test');
+        putenv('PLATFORM_ENVIRONMENT=test');
         putenv('APP_ENV=dev');
 
         mapPlatformShEnvironment();
@@ -53,7 +56,8 @@ class FlexBridgeTest extends TestCase
 
     public function testAppEnvAlreadySetInEnv() : void
     {
-        putenv('PLATFORM_APPLICATION=test');
+        putenv('PLATFORM_APPLICATION_NAME=test');
+        putenv('PLATFORM_ENVIRONMENT=test');
         putenv('APP_ENV=dev');
 
         mapPlatformShEnvironment();
@@ -64,7 +68,8 @@ class FlexBridgeTest extends TestCase
 
     public function testAppEnvNeedsDefault() : void
     {
-        putenv('PLATFORM_APPLICATION=test');
+        putenv('PLATFORM_APPLICATION_NAME=test');
+        putenv('PLATFORM_ENVIRONMENT=test');
 
         mapPlatformShEnvironment();
 
@@ -74,7 +79,8 @@ class FlexBridgeTest extends TestCase
 
     public function testSwiftmailer() : void
     {
-        putenv('PLATFORM_APPLICATION=test');
+        putenv('PLATFORM_APPLICATION_NAME=test');
+        putenv('PLATFORM_ENVIRONMENT=test');
         putenv('PLATFORM_SMTP_HOST=1.2.3.4');
 
         mapPlatformShEnvironment();
