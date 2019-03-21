@@ -49,7 +49,7 @@ class FlexBridgeDatabaseTest extends TestCase
         $this->assertArrayNotHasKey('DATABASE_URL', $_SERVER);
     }
 
-    public function testNoRelationships() : void
+    public function testNoRelationshipsBecauseBuild() : void
     {
         // Application name but no environment name means build hook.
 
@@ -62,7 +62,7 @@ class FlexBridgeDatabaseTest extends TestCase
         $this->assertEquals($this->defaultDbUrl, $_SERVER['DATABASE_URL']);
     }
 
-    public function testNoDatabaseRelationship() : void
+    public function testNoDatabaseRelationshipInRuntime() : void
     {
         putenv('PLATFORM_APPLICATION_NAME=test');
         putenv('PLATFORM_ENVIRONMENT=test');
@@ -74,7 +74,7 @@ class FlexBridgeDatabaseTest extends TestCase
 
         mapPlatformShEnvironment();
 
-        $this->assertEquals($this->defaultDbUrl, $_SERVER['DATABASE_URL']);
+        $this->assertArrayNotHasKey('DATABASE_URL', $_SERVER);
     }
 
     public function testDatabaseRelationshipSet() : void

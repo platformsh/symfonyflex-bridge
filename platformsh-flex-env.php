@@ -42,14 +42,13 @@ function mapPlatformShEnvironment() : void
     $appEnv = getenv('APP_ENV') ?: 'prod';
     setEnvVar('APP_ENV', $appEnv);
 
-    if (!getenv('DATABASE_URL')) {
-        setEnvVar('DATABASE_URL', mapPlatformShDatabase());
-    }
+    mapPlatformShDatabase('database', $config);
 
     mapPlatformShMongoDatabase('mongodatabase', $config);
 
+    // Set the Swiftmailer configuration if it's not set already.
     if (!getenv('MAILER_URL')) {
-        setEnvVar('MAILER_URL', mapPlatformShSwiftmailer());
+        mapPlatformShSwiftmailer($config);
     }
 }
 
@@ -78,93 +77,75 @@ function setEnvVar(string $name, ?string $value) : void
     }
 }
 
-function mapPlatformShSwiftmailer() : string
+function mapPlatformShSwiftmailer(Config $config)
 {
     $mailUrl = sprintf(
         '%s://%s:%d/',
         'smtp',
-        getenv('PLATFORM_SMTP_HOST'),
+        $config->smtpHost,
         25
     );
 
-    return $mailUrl;
+    setEnvVar('MAILER_URL', $mailUrl);
 }
 
-function mapPlatformShDatabase() : string
+function doctrineFormatter(array $credentials) : string
 {
-    $dbRelationshipName = 'database';
-
-    // Set the DATABASE_URL for Doctrine, if necessary.
-    # "mysql://root@127.0.0.1:3306/symfony?charset=utf8mb4&serverVersion=5.7";
-    if (getenv('PLATFORM_RELATIONSHIPS')) {
-        $relationships = json_decode(base64_decode(getenv('PLATFORM_RELATIONSHIPS'), true), true);
-        if (isset($relationships[$dbRelationshipName])) {
-            foreach ($relationships[$dbRelationshipName] as $endpoint) {
-                if (empty($endpoint['query']['is_master'])) {
-                    continue;
-                }
-
-                $dbUrl = sprintf(
-                    '%s://%s:%s@%s:%d/%s',
-                    $endpoint['scheme'],
-                    $endpoint['username'],
-                    $endpoint['password'],
-                    $endpoint['host'],
-                    $endpoint['port'],
-                    $endpoint['path']
-                );
-
-                switch ($endpoint['scheme']) {
-                    case 'mysql':
-                        $type = $endpoint['type'] ?? DEFAULT_MYSQL_ENDPOINT_TYPE;
-                        $versionPosition = strpos($type, ":");
-
-                         // If version is found, use it, otherwise, default to mariadb 10.2
-                        $dbVersion = (false !== $versionPosition) ? substr($type, $versionPosition + 1) : '10.2';
-
-                        // doctrine needs the mariadb-prefix if it's an instance of MariaDB server
-                        if ($dbVersion !== '5.5') {
-                            $dbVersion = sprintf('mariadb-%s', $dbVersion);
-                        }
-
-                        // if MariaDB is in version 10.2, doctrine needs to know it's superior to patch version 6 to work properly
-                        if ($dbVersion === 'mariadb-10.2') {
-                            $dbVersion = sprintf('%s.12', $dbVersion);
-                        }
-
-                        $dbUrl .= sprintf('?charset=utf8mb4&serverVersion=%s', $dbVersion);
-                        break;
-                    case 'pgsql':
-                        $type = $endpoint['type'] ?? DEFAULT_POSTGRESQL_ENDPOINT_TYPE;
-                        $versionPosition = strpos($type, ":");
-
-                        $dbVersion = (false !== $versionPosition) ? substr($type, $versionPosition + 1) : '11';
-                        $dbUrl .= sprintf('?serverVersion=%s', $dbVersion);
-                        break;
-                }
-
-                return $dbUrl;
-            }
-        }
-    }
-
-    // Hack the Doctrine URL to be syntactically valid in a build hook, even
-    // though it shouldn't be used.
     $dbUrl = sprintf(
-        '%s://%s:%s@%s:%s/%s?charset=utf8mb4&serverVersion=%s',
-        'mysql',
-        '',
-        '',
-        'localhost',
-        3306,
-        '',
-        $dbVersion ?? 'mariadb-10.2.12'
+        '%s://%s:%s@%s:%d/%s',
+        $credentials['scheme'],
+        $credentials['username'],
+        $credentials['password'],
+        $credentials['host'],
+        $credentials['port'],
+        $credentials['path']
     );
 
+    switch ($credentials['scheme']) {
+        case 'mysql':
+            $type = $credentials['type'] ?? DEFAULT_MYSQL_ENDPOINT_TYPE;
+            $versionPosition = strpos($type, ":");
+
+            // If version is found, use it, otherwise, default to mariadb 10.2
+            $dbVersion = (false !== $versionPosition) ? substr($type, $versionPosition + 1) : '10.2';
+
+            // doctrine needs the mariadb-prefix if it's an instance of MariaDB server
+            if ($dbVersion !== '5.5') {
+                $dbVersion = sprintf('mariadb-%s', $dbVersion);
+            }
+
+            // if MariaDB is in version 10.2, doctrine needs to know it's superior to patch version 6 to work properly
+            if ($dbVersion === 'mariadb-10.2') {
+                $dbVersion = sprintf('%s.12', $dbVersion);
+            }
+
+            $dbUrl .= sprintf('?charset=utf8mb4&serverVersion=%s', $dbVersion);
+            break;
+        case 'pgsql':
+            $type = $credentials['type'] ?? DEFAULT_POSTGRESQL_ENDPOINT_TYPE;
+            $versionPosition = strpos($type, ":");
+
+            $dbVersion = (false !== $versionPosition) ? substr($type, $versionPosition + 1) : '11';
+            $dbUrl .= sprintf('?serverVersion=%s', $dbVersion);
+            break;
+    }
+
     return $dbUrl;
+
 }
 
-function setDefaultDoctrineUrl()
+function mapPlatformShDatabase(string $relationshipName, Config $config) : void
+{
+    if (!$config->hasRelationship($relationshipName)) {
+        return;
+    }
+
+    $config->registerFormatter('doctrine', __NAMESPACE__ . '\doctrineFormatter');
+
+    setEnvVar('DATABASE_URL', $config->formattedCredentials($relationshipName, 'doctrine'));
+}
+
+function setDefaultDoctrineUrl() : void
 {
     // Hack the Doctrine URL to be syntactically valid in a build hook, even
     // though it shouldn't be used.
