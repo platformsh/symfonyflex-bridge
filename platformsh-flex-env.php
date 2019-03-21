@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Platformsh\FlexBridge;
 
+use Platformsh\ConfigReader\Config;
 const DEFAULT_MYSQL_ENDPOINT_TYPE = 'mysql:10.2';
 
 const DEFAULT_POSTGRESQL_ENDPOINT_TYPE = 'postgresql:9.6';
@@ -18,14 +19,21 @@ mapPlatformShEnvironment();
  */
 function mapPlatformShEnvironment() : void
 {
-    // If this env var is not set then we're not on a Platform.sh
-    // environment or in the build hook, so don't try to do anything.
-    if (!getenv('PLATFORM_APPLICATION_NAME')) {
+    $config = new Config();
+
+    if (!$config->inRuntime()) {
+        if ($config->inBuild()) {
+            // In the build hook we still need to set a fake Doctrine URL in order to
+            // work around bugs in Doctrine.
+            setDefaultDoctrineUrl();
+        }
         return;
     }
 
     // Set the application secret if it's not already set.
-    $secret = getenv('APP_SECRET') ?: getenv('PLATFORM_PROJECT_ENTROPY') ?: null;
+    // We force re-setting the APP_SECRET to ensure it's set in all of PHP's various
+    // environment places.
+    $secret = getenv('APP_SECRET') ?: $config->projectEntropy;
     setEnvVar('APP_SECRET', $secret);
 
     // Default to production. You can override this value by setting
@@ -154,6 +162,24 @@ function mapPlatformShDatabase() : string
     );
 
     return $dbUrl;
+}
+
+function setDefaultDoctrineUrl()
+{
+    // Hack the Doctrine URL to be syntactically valid in a build hook, even
+    // though it shouldn't be used.
+    $dbUrl = sprintf(
+        '%s://%s:%s@%s:%s/%s?charset=utf8mb4&serverVersion=%s',
+        'mysql',
+        '',
+        '',
+        'localhost',
+        3306,
+        '',
+        $dbVersion ?? 'mariadb-10.2.12'
+    );
+
+    setEnvVar('DATABASE_URL', $dbUrl);
 }
 
 /**
