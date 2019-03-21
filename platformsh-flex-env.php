@@ -45,9 +45,9 @@ function mapPlatformShEnvironment() : void
     if (!getenv('DATABASE_URL')) {
         setEnvVar('DATABASE_URL', mapPlatformShDatabase());
     }
-    if (!getenv('MONGO_SERVER')) {
-        mapPlatformShMongoDatabase();
-    }
+
+    mapPlatformShMongoDatabase('mongodatabase', $config);
+
     if (!getenv('MAILER_URL')) {
         setEnvVar('MAILER_URL', mapPlatformShSwiftmailer());
     }
@@ -197,21 +197,16 @@ function setDefaultDoctrineUrl()
  *
  * For more information: https://symfony.com/doc/master/bundles/DoctrineMongoDBBundle/index.html
  */
-function mapPlatformShMongoDatabase(): void
+function mapPlatformShMongoDatabase(string $relationshipName, Config $config): void
 {
-    $dbRelationshipName = 'mongodatabase';
-
-    if (getenv('PLATFORM_RELATIONSHIPS')) {
-        $relationships = json_decode(base64_decode(getenv('PLATFORM_RELATIONSHIPS'), true), true);
-        if (isset($relationships[$dbRelationshipName])) {
-            foreach ($relationships[$dbRelationshipName] as $endpoint) {
-                if (!empty($endpoint['query']['is_master'])) {
-                    setEnvVar('MONGODB_SERVER', sprintf('mongodb://%s:%d', $endpoint['host'], $endpoint['port']));
-                    setEnvVar('MONGODB_DB', $endpoint['path']);
-                    setEnvVar('MONGODB_USERNAME', $endpoint['username']);
-                    setEnvVar('MONGODB_PASSWORD', $endpoint['password']);
-                }
-            }
-        }
+    if (!$config->hasRelationship($relationshipName)) {
+        return;
     }
+
+    $credentials = $config->credentials($relationshipName);
+
+    setEnvVar('MONGODB_SERVER', sprintf('mongodb://%s:%d', $credentials['host'], $credentials['port']));
+    setEnvVar('MONGODB_DB', $credentials['path']);
+    setEnvVar('MONGODB_USERNAME', $credentials['username']);
+    setEnvVar('MONGODB_PASSWORD', $credentials['password']);
 }
