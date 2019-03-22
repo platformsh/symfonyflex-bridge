@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Platformsh\FlexBridge;
 
+use Platformsh\ConfigReader\Config;
 const DEFAULT_MYSQL_ENDPOINT_TYPE = 'mysql:10.2';
 
 const DEFAULT_POSTGRESQL_ENDPOINT_TYPE = 'postgresql:9.6';
@@ -18,14 +19,23 @@ mapPlatformShEnvironment();
  */
 function mapPlatformShEnvironment() : void
 {
-    // If this env var is not set then we're not on a Platform.sh
-    // environment or in the build hook, so don't try to do anything.
-    if (!getenv('PLATFORM_APPLICATION')) {
+    $config = new Config();
+
+    if (!$config->inRuntime()) {
+        if ($config->inBuild()) {
+            // In the build hook we still need to set a fake Doctrine URL in order to
+            // work around bugs in Doctrine.
+            setDefaultDoctrineUrl();
+        }
         return;
     }
 
+    $config->registerFormatter('doctrine', __NAMESPACE__ . '\doctrineFormatter');
+
     // Set the application secret if it's not already set.
-    $secret = getenv('APP_SECRET') ?: getenv('PLATFORM_PROJECT_ENTROPY') ?: null;
+    // We force re-setting the APP_SECRET to ensure it's set in all of PHP's various
+    // environment places.
+    $secret = getenv('APP_SECRET') ?: $config->projectEntropy;
     setEnvVar('APP_SECRET', $secret);
 
     // Default to production. You can override this value by setting
@@ -34,14 +44,13 @@ function mapPlatformShEnvironment() : void
     $appEnv = getenv('APP_ENV') ?: 'prod';
     setEnvVar('APP_ENV', $appEnv);
 
-    if (!getenv('DATABASE_URL')) {
-        setEnvVar('DATABASE_URL', mapPlatformShDatabase());
-    }
-    if (!getenv('MONGO_SERVER')) {
-        mapPlatformShMongoDatabase();
-    }
+    // Map services as feasible.
+    mapPlatformShDatabase('database', $config);
+    mapPlatformShMongoDatabase('mongodatabase', $config);
+
+    // Set the Swiftmailer configuration if it's not set already.
     if (!getenv('MAILER_URL')) {
-        setEnvVar('MAILER_URL', mapPlatformShSwiftmailer());
+        mapPlatformShSwiftmailer($config);
     }
 }
 
@@ -70,76 +79,89 @@ function setEnvVar(string $name, ?string $value) : void
     }
 }
 
-function mapPlatformShSwiftmailer() : string
+function mapPlatformShSwiftmailer(Config $config)
 {
     $mailUrl = sprintf(
         '%s://%s:%d/',
         'smtp',
-        getenv('PLATFORM_SMTP_HOST'),
+        $config->smtpHost,
         25
     );
 
-    return $mailUrl;
+    setEnvVar('MAILER_URL', $mailUrl);
 }
 
-function mapPlatformShDatabase() : string
+function doctrineFormatter(array $credentials) : string
 {
-    $dbRelationshipName = 'database';
+    $dbUrl = sprintf(
+        '%s://%s:%s@%s:%d/%s',
+        $credentials['scheme'],
+        $credentials['username'],
+        $credentials['password'],
+        $credentials['host'],
+        $credentials['port'],
+        $credentials['path']
+    );
 
-    // Set the DATABASE_URL for Doctrine, if necessary.
-    # "mysql://root@127.0.0.1:3306/symfony?charset=utf8mb4&serverVersion=5.7";
-    if (getenv('PLATFORM_RELATIONSHIPS')) {
-        $relationships = json_decode(base64_decode(getenv('PLATFORM_RELATIONSHIPS'), true), true);
-        if (isset($relationships[$dbRelationshipName])) {
-            foreach ($relationships[$dbRelationshipName] as $endpoint) {
-                if (empty($endpoint['query']['is_master'])) {
-                    continue;
-                }
+    switch ($credentials['scheme']) {
+        case 'mysql':
+            $type = $credentials['type'] ?? DEFAULT_MYSQL_ENDPOINT_TYPE;
+            $versionPosition = strpos($type, ":");
 
-                $dbUrl = sprintf(
-                    '%s://%s:%s@%s:%d/%s',
-                    $endpoint['scheme'],
-                    $endpoint['username'],
-                    $endpoint['password'],
-                    $endpoint['host'],
-                    $endpoint['port'],
-                    $endpoint['path']
-                );
+            // If a version is found, use it, otherwise, default to mariadb 10.2.
+            $dbVersion = (false !== $versionPosition) ? substr($type, $versionPosition + 1) : '10.2';
 
-                switch ($endpoint['scheme']) {
-                    case 'mysql':
-                        $type = $endpoint['type'] ?? DEFAULT_MYSQL_ENDPOINT_TYPE;
-                        $versionPosition = strpos($type, ":");
-
-                         // If version is found, use it, otherwise, default to mariadb 10.2
-                        $dbVersion = (false !== $versionPosition) ? substr($type, $versionPosition + 1) : '10.2';
-
-                        // doctrine needs the mariadb-prefix if it's an instance of MariaDB server
-                        if ($dbVersion !== '5.5') {
-                            $dbVersion = sprintf('mariadb-%s', $dbVersion);
-                        }
-
-                        // if MariaDB is in version 10.2, doctrine needs to know it's superior to patch version 6 to work properly
-                        if ($dbVersion === 'mariadb-10.2') {
-                            $dbVersion = sprintf('%s.12', $dbVersion);
-                        }
-
-                        $dbUrl .= sprintf('?charset=utf8mb4&serverVersion=%s', $dbVersion);
-                        break;
-                    case 'pgsql':
-                        $type = $endpoint['type'] ?? DEFAULT_POSTGRESQL_ENDPOINT_TYPE;
-                        $versionPosition = strpos($type, ":");
-
-                        $dbVersion = (false !== $versionPosition) ? substr($type, $versionPosition + 1) : '11';
-                        $dbUrl .= sprintf('?serverVersion=%s', $dbVersion);
-                        break;
-                }
-
-                return $dbUrl;
+            // Doctrine needs the mariadb-prefix if it's an instance of MariaDB server
+            if ($dbVersion !== '5.5') {
+                $dbVersion = sprintf('mariadb-%s', $dbVersion);
             }
-        }
+
+            // if MariaDB is in version 10.2, doctrine needs to know it's superior to patch version 6 to work properly
+            if ($dbVersion === 'mariadb-10.2') {
+                $dbVersion .= '.12';
+            }
+
+            $dbUrl .= sprintf('?charset=utf8mb4&serverVersion=%s', $dbVersion);
+            break;
+        case 'pgsql':
+            $type = $credentials['type'] ?? DEFAULT_POSTGRESQL_ENDPOINT_TYPE;
+            $versionPosition = strpos($type, ":");
+
+            $dbVersion = (false !== $versionPosition) ? substr($type, $versionPosition + 1) : '11';
+            $dbUrl .= sprintf('?serverVersion=%s', $dbVersion);
+            break;
     }
 
+    return $dbUrl;
+
+}
+
+/**
+ * Maps the specified relationship to the DATABASE_URL environment variable, if available.
+ *
+ * @param string $relationshipName
+ *   The database relationship name.
+ * @param Config $config
+ *   The config object.
+ */
+function mapPlatformShDatabase(string $relationshipName, Config $config) : void
+{
+    if (!$config->hasRelationship($relationshipName)) {
+        return;
+    }
+
+    setEnvVar('DATABASE_URL', $config->formattedCredentials($relationshipName, 'doctrine'));
+}
+
+/**
+ * Sets a default Doctrine URL.
+ *
+ * Doctrine needs a well-formed URL string with a database version even in the build hook.
+ * It doesn't use it, but it fails if it's not there.  This default meets the minimum
+ * requirements of the format without actually allowing a connection.
+ */
+function setDefaultDoctrineUrl() : void
+{
     // Hack the Doctrine URL to be syntactically valid in a build hook, even
     // though it shouldn't be used.
     $dbUrl = sprintf(
@@ -150,18 +172,18 @@ function mapPlatformShDatabase() : string
         'localhost',
         3306,
         '',
-        $dbVersion ?? 'mariadb-10.2.12'
+        'mariadb-10.2.12'
     );
 
-    return $dbUrl;
+    setEnvVar('DATABASE_URL', $dbUrl);
 }
 
 /**
- * Set the MONGODB_SERVER, MONGODB_DB, MONGODB_USERNAME, and MONGODB_PASSWORD for Doctrine, if necessary.
- * Usage of the full dsn string is NOT working with doctrine-odm-bundle, that's why
- * we need those 4 env variables.
+ * Maps the specified relationship to a Doctrine MongoDB connection, if available.
  *
- * Here is a example of the related doctrine-odm-bundle:
+ * MongoDB ODM uses a set of discrete environment variables rather than a single DB URL string
+ * as in Doctrine ORM.  The related doctrine-odm-bundle settings should be:
+ *
  * doctrine_mongodb:
  *     connections:
  *         default:
@@ -169,23 +191,23 @@ function mapPlatformShDatabase() : string
  *             options: { username: '%env(MONGODB_USERNAME)%', password: '%env(MONGODB_PASSWORD)%', authSource: '%env(MONGODB_DB)%' }
  *     default_database: '%env(MONGODB_DB)%'
  *
- * For more information: https://symfony.com/doc/master/bundles/DoctrineMongoDBBundle/index.html
+ * @see https://symfony.com/doc/master/bundles/DoctrineMongoDBBundle/index.html
+ *
+ * @param string $relationshipName
+ *   The MongoDB database relationship name.
+ * @param Config $config
+ *   The config object.
  */
-function mapPlatformShMongoDatabase(): void
+function mapPlatformShMongoDatabase(string $relationshipName, Config $config): void
 {
-    $dbRelationshipName = 'mongodatabase';
-
-    if (getenv('PLATFORM_RELATIONSHIPS')) {
-        $relationships = json_decode(base64_decode(getenv('PLATFORM_RELATIONSHIPS'), true), true);
-        if (isset($relationships[$dbRelationshipName])) {
-            foreach ($relationships[$dbRelationshipName] as $endpoint) {
-                if (!empty($endpoint['query']['is_master'])) {
-                    setEnvVar('MONGODB_SERVER', sprintf('mongodb://%s:%d', $endpoint['host'], $endpoint['port']));
-                    setEnvVar('MONGODB_DB', $endpoint['path']);
-                    setEnvVar('MONGODB_USERNAME', $endpoint['username']);
-                    setEnvVar('MONGODB_PASSWORD', $endpoint['password']);
-                }
-            }
-        }
+    if (!$config->hasRelationship($relationshipName)) {
+        return;
     }
+
+    $credentials = $config->credentials($relationshipName);
+
+    setEnvVar('MONGODB_SERVER', sprintf('mongodb://%s:%d', $credentials['host'], $credentials['port']));
+    setEnvVar('MONGODB_DB', $credentials['path']);
+    setEnvVar('MONGODB_USERNAME', $credentials['username']);
+    setEnvVar('MONGODB_PASSWORD', $credentials['password']);
 }

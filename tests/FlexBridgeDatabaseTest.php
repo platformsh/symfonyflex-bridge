@@ -49,12 +49,11 @@ class FlexBridgeDatabaseTest extends TestCase
         $this->assertArrayNotHasKey('DATABASE_URL', $_SERVER);
     }
 
-    public function testNoRelationships() : void
+    public function testNoRelationshipsBecauseBuild() : void
     {
-        // We assume no relationships array, but a PLATFORM_APPLICATION env var,
-        // means we're in a build hook.
+        // Application name but no environment name means build hook.
 
-        putenv('PLATFORM_APPLICATION=test');
+        putenv('PLATFORM_APPLICATION_NAME=test');
 
         //putenv(sprintf('PLATFORM_RELATIONSHIPS=%s', base64_encode(json_encode($this->relationships))));
 
@@ -63,9 +62,10 @@ class FlexBridgeDatabaseTest extends TestCase
         $this->assertEquals($this->defaultDbUrl, $_SERVER['DATABASE_URL']);
     }
 
-    public function testNoDatabaseRelationship() : void
+    public function testNoDatabaseRelationshipInRuntime() : void
     {
-        putenv('PLATFORM_APPLICATION=test');
+        putenv('PLATFORM_APPLICATION_NAME=test');
+        putenv('PLATFORM_ENVIRONMENT=test');
 
         $rels = $this->relationships;
         unset($rels['database']);
@@ -74,12 +74,13 @@ class FlexBridgeDatabaseTest extends TestCase
 
         mapPlatformShEnvironment();
 
-        $this->assertEquals($this->defaultDbUrl, $_SERVER['DATABASE_URL']);
+        $this->assertArrayNotHasKey('DATABASE_URL', $_SERVER);
     }
 
     public function testDatabaseRelationshipSet() : void
     {
-        putenv('PLATFORM_APPLICATION=test');
+        putenv('PLATFORM_APPLICATION_NAME=test');
+        putenv('PLATFORM_ENVIRONMENT=test');
         putenv(sprintf('PLATFORM_RELATIONSHIPS=%s', base64_encode(json_encode($this->relationships))));
 
         mapPlatformShEnvironment();
@@ -88,7 +89,8 @@ class FlexBridgeDatabaseTest extends TestCase
 
     public function testDatabaseRelationshipOnFoundation1() : void
     {
-        putenv('PLATFORM_APPLICATION=test');
+        putenv('PLATFORM_APPLICATION_NAME=test');
+        putenv('PLATFORM_ENVIRONMENT=test');
 
         $rels = $this->relationships;
 
