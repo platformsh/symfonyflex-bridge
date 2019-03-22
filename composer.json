@@ -11,7 +11,7 @@
     ],
     "require": {
         "php": "^7.1",
-        "platformsh/config-reader": "dev-master"
+        "platformsh/config-reader": "^2.1.0"
     },
     "autoload": {
         "files": ["platformsh-flex-env.php"]
