@@ -1,5 +1,5 @@
 {
-    "name": "platformsh/symfonyflex-bridge",
+    "name": "maximgubar/platformsh-symfonyflex-bridge",
     "description": "Bridge library for running Symfony Flex on Platform.sh",
     "type": "library",
     "license": "MIT",
