@@ -225,7 +225,7 @@ function mapPlatformShElasticSearch(string $relationshipName, Config $config): v
     setEnvVar('ELASTICSEARCH_CLUSTER', $credentials['cluster']);
     setEnvVar('ELASTICSEARCH_SERVICE', $credentials['service']);
     setEnvVar('ELASTICSEARCH_REL', $credentials['rel']);
-    setEnvVar('ELASTICSEARCH_PORT', $credentials['port']);
+    setEnvVar('ELASTICSEARCH_PORT', (string)$credentials['port']);
     setEnvVar('ELASTICSEARCH_IP', $credentials['ip']);
     setEnvVar('ELASTICSEARCH_SCHEME', $credentials['scheme']);
     setEnvVar('ELASTICSEARCH_URL', sprintf(
