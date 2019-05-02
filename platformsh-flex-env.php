@@ -83,8 +83,8 @@ function mapPlatformShSwiftmailer(Config $config)
 {
     $mailUrl = sprintf(
         '%s://%s:%d/',
-        'smtp',
-        $config->smtpHost,
+        $config->smtpHost ? 'smtp' : 'null',
+        $config->smtpHost ?: 'localhost',
         25
     );
 
