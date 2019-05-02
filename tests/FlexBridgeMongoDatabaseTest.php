@@ -48,6 +48,8 @@ class FlexBridgeMongoDatabaseTest extends TestCase
     {
         putenv('PLATFORM_APPLICATION_NAME=test');
         putenv('PLATFORM_ENVIRONMENT=test');
+        putenv('PLATFORM_PROJECT_ENTROPY=test');
+        putenv('PLATFORM_SMTP_HOST=1.2.3.4');
 
         $rels = $this->relationships;
         unset($rels['mongodatabase']);
@@ -66,6 +68,8 @@ class FlexBridgeMongoDatabaseTest extends TestCase
     {
         putenv('PLATFORM_APPLICATION_NAME=test');
         putenv('PLATFORM_ENVIRONMENT=test');
+        putenv('PLATFORM_PROJECT_ENTROPY=test');
+        putenv('PLATFORM_SMTP_HOST=1.2.3.4');
         putenv(sprintf('PLATFORM_RELATIONSHIPS=%s', base64_encode(json_encode($this->relationships))));
 
         mapPlatformShEnvironment();

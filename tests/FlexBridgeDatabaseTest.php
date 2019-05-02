@@ -54,6 +54,8 @@ class FlexBridgeDatabaseTest extends TestCase
         // Application name but no environment name means build hook.
 
         putenv('PLATFORM_APPLICATION_NAME=test');
+        putenv('PLATFORM_PROJECT_ENTROPY=test');
+        putenv('PLATFORM_SMTP_HOST=1.2.3.4');
 
         //putenv(sprintf('PLATFORM_RELATIONSHIPS=%s', base64_encode(json_encode($this->relationships))));
 
@@ -66,6 +68,8 @@ class FlexBridgeDatabaseTest extends TestCase
     {
         putenv('PLATFORM_APPLICATION_NAME=test');
         putenv('PLATFORM_ENVIRONMENT=test');
+        putenv('PLATFORM_PROJECT_ENTROPY=test');
+        putenv('PLATFORM_SMTP_HOST=1.2.3.4');
 
         $rels = $this->relationships;
         unset($rels['database']);
@@ -81,6 +85,8 @@ class FlexBridgeDatabaseTest extends TestCase
     {
         putenv('PLATFORM_APPLICATION_NAME=test');
         putenv('PLATFORM_ENVIRONMENT=test');
+        putenv('PLATFORM_PROJECT_ENTROPY=test');
+        putenv('PLATFORM_SMTP_HOST=1.2.3.4');
         putenv(sprintf('PLATFORM_RELATIONSHIPS=%s', base64_encode(json_encode($this->relationships))));
 
         mapPlatformShEnvironment();
@@ -91,6 +97,8 @@ class FlexBridgeDatabaseTest extends TestCase
     {
         putenv('PLATFORM_APPLICATION_NAME=test');
         putenv('PLATFORM_ENVIRONMENT=test');
+        putenv('PLATFORM_PROJECT_ENTROPY=test');
+        putenv('PLATFORM_SMTP_HOST=1.2.3.4');
 
         $rels = $this->relationships;
 

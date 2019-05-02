@@ -22,6 +22,7 @@ class FlexBridgeTest extends TestCase
         putenv('PLATFORM_APPLICATION_NAME=test');
         putenv('PLATFORM_ENVIRONMENT=test');
         putenv('PLATFORM_PROJECT_ENTROPY=test');
+        putenv('PLATFORM_SMTP_HOST=1.2.3.4');
 
         mapPlatformShEnvironment();
 
@@ -34,6 +35,7 @@ class FlexBridgeTest extends TestCase
         putenv('PLATFORM_APPLICATION_NAME=test');
         putenv('PLATFORM_ENVIRONMENT=test');
         putenv('PLATFORM_PROJECT_ENTROPY=test');
+        putenv('PLATFORM_SMTP_HOST=1.2.3.4');
         putenv('APP_SECRET=original');
 
         mapPlatformShEnvironment();
@@ -46,6 +48,8 @@ class FlexBridgeTest extends TestCase
     {
         putenv('PLATFORM_APPLICATION_NAME=test');
         putenv('PLATFORM_ENVIRONMENT=test');
+        putenv('PLATFORM_PROJECT_ENTROPY=test');
+        putenv('PLATFORM_SMTP_HOST=1.2.3.4');
         putenv('APP_ENV=dev');
 
         mapPlatformShEnvironment();
@@ -58,6 +62,8 @@ class FlexBridgeTest extends TestCase
     {
         putenv('PLATFORM_APPLICATION_NAME=test');
         putenv('PLATFORM_ENVIRONMENT=test');
+        putenv('PLATFORM_PROJECT_ENTROPY=test');
+        putenv('PLATFORM_SMTP_HOST=1.2.3.4');
         putenv('APP_ENV=dev');
 
         mapPlatformShEnvironment();
@@ -69,7 +75,10 @@ class FlexBridgeTest extends TestCase
     public function testAppEnvNeedsDefault() : void
     {
         putenv('PLATFORM_APPLICATION_NAME=test');
+        putenv('PLATFORM_PROJECT_ENTROPY=test');
         putenv('PLATFORM_ENVIRONMENT=test');
+        putenv('PLATFORM_SMTP_HOST=1.2.3.4');
+        putenv('PLATFORM_PROJECT_ENTROPY=test');
 
         mapPlatformShEnvironment();
 
@@ -82,6 +91,7 @@ class FlexBridgeTest extends TestCase
         putenv('PLATFORM_APPLICATION_NAME=test');
         putenv('PLATFORM_ENVIRONMENT=test');
         putenv('PLATFORM_SMTP_HOST=1.2.3.4');
+        putenv('PLATFORM_PROJECT_ENTROPY=test');
 
         mapPlatformShEnvironment();
 
@@ -93,6 +103,7 @@ class FlexBridgeTest extends TestCase
     {
         putenv('PLATFORM_APPLICATION_NAME=test');
         putenv('PLATFORM_ENVIRONMENT=test');
+        putenv('PLATFORM_PROJECT_ENTROPY=test');
         putenv('PLATFORM_SMTP_HOST=');
 
         mapPlatformShEnvironment();
