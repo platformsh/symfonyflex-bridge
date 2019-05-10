@@ -99,12 +99,24 @@ class FlexBridgeTest extends TestCase
         $this->assertEquals('smtp://1.2.3.4:25/', getenv('MAILER_URL'));
     }
 
-    public function testSwiftmailerDisabledMail() : void
+    public function testSwiftmailerDisabledMailEnvVarEmpty() : void
     {
         putenv('PLATFORM_APPLICATION_NAME=test');
         putenv('PLATFORM_ENVIRONMENT=test');
         putenv('PLATFORM_PROJECT_ENTROPY=test');
         putenv('PLATFORM_SMTP_HOST=');
+
+        mapPlatformShEnvironment();
+
+        $this->assertEquals('null://localhost:25/', $_SERVER['MAILER_URL']);
+        $this->assertEquals('null://localhost:25/', getenv('MAILER_URL'));
+    }
+
+    public function testSwiftmailerDisabledMailEnvVarNotDefined() : void
+    {
+        putenv('PLATFORM_APPLICATION_NAME=test');
+        putenv('PLATFORM_ENVIRONMENT=test');
+        putenv('PLATFORM_PROJECT_ENTROPY=test');
 
         mapPlatformShEnvironment();
 
