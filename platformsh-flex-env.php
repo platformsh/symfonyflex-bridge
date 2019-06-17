@@ -52,6 +52,11 @@ function mapPlatformShEnvironment() : void
     if (!getenv('MAILER_URL')) {
         mapPlatformShSwiftmailer($config);
     }
+
+    // Set the Symfony Mailer configuration if it's not set already.
+    if (!getenv('MAILER_DSN')) {
+        mapPlatformShMailer($config);
+    }
 }
 
 /**
@@ -89,6 +94,18 @@ function mapPlatformShSwiftmailer(Config $config)
     );
 
     setEnvVar('MAILER_URL', $mailUrl);
+}
+
+function mapPlatformShMailer(Config $config)
+{
+    $mailUrl = sprintf(
+        '%s://%s:%d/',
+        !empty($config->smtpHost) ? 'smtp' : 'null',
+        !empty($config->smtpHost) ? $config->smtpHost : 'localhost',
+        25
+    );
+
+    setEnvVar('MAILER_DSN', $mailUrl);
 }
 
 function doctrineFormatter(array $credentials) : string

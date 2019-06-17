@@ -123,4 +123,42 @@ class FlexBridgeTest extends TestCase
         $this->assertEquals('null://localhost:25/', $_SERVER['MAILER_URL']);
         $this->assertEquals('null://localhost:25/', getenv('MAILER_URL'));
     }
+
+    public function testMailer() : void
+    {
+        putenv('PLATFORM_APPLICATION_NAME=test');
+        putenv('PLATFORM_ENVIRONMENT=test');
+        putenv('PLATFORM_SMTP_HOST=1.2.3.4');
+        putenv('PLATFORM_PROJECT_ENTROPY=test');
+
+        mapPlatformShEnvironment();
+
+        $this->assertEquals('smtp://1.2.3.4:25/', $_SERVER['MAILER_DSN']);
+        $this->assertEquals('smtp://1.2.3.4:25/', getenv('MAILER_DSN'));
+    }
+
+    public function testMailerDisabledMailEnvVarEmpty() : void
+    {
+        putenv('PLATFORM_APPLICATION_NAME=test');
+        putenv('PLATFORM_ENVIRONMENT=test');
+        putenv('PLATFORM_PROJECT_ENTROPY=test');
+        putenv('PLATFORM_SMTP_HOST=');
+
+        mapPlatformShEnvironment();
+
+        $this->assertEquals('null://localhost:25/', $_SERVER['MAILER_DSN']);
+        $this->assertEquals('null://localhost:25/', getenv('MAILER_DSN'));
+    }
+
+    public function testMailerDisabledMailEnvVarNotDefined() : void
+    {
+        putenv('PLATFORM_APPLICATION_NAME=test');
+        putenv('PLATFORM_ENVIRONMENT=test');
+        putenv('PLATFORM_PROJECT_ENTROPY=test');
+
+        mapPlatformShEnvironment();
+
+        $this->assertEquals('null://localhost:25/', $_SERVER['MAILER_DSN']);
+        $this->assertEquals('null://localhost:25/', getenv('MAILER_DSN'));
+    }
 }
