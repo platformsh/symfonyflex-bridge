@@ -48,6 +48,7 @@ function mapPlatformShEnvironment() : void
     mapPlatformShDatabase('database', $config);
     mapPlatformShMongoDatabase('mongodatabase', $config);
     mapPlatformShElasticSearch('elasticsearch', $config);
+    mapPlatformShRabbitMq('rabbitmq', $config);
 
     // Set the Swiftmailer configuration if it's not set already.
     if (!getenv('MAILER_URL')) {
@@ -231,6 +232,24 @@ function mapPlatformShElasticSearch(string $relationshipName, Config $config): v
     setEnvVar('ELASTICSEARCH_URL', sprintf(
         '%s://%s:%d',
         $credentials['scheme'],
+        $credentials['host'],
+        $credentials['port']
+    ));
+}
+
+function mapPlatformShRabbitMq(string $relationshipName, Config $config): void
+{
+    if (!$config->hasRelationship($relationshipName)) {
+        return;
+    }
+
+    $credentials = $config->credentials($relationshipName);
+
+    setEnvVar('MESSENGER_TRANSPORT_DSN', sprintf(
+        '%s://%s:%s@%s:%d/%%2f/messages',
+        $credentials['scheme'],
+        $credentials['username'],
+        $credentials['password'],
         $credentials['host'],
         $credentials['port']
     ));
