@@ -47,6 +47,7 @@ function mapPlatformShEnvironment() : void
     // Map services as feasible.
     mapPlatformShDatabase('database', $config);
     mapPlatformShMongoDatabase('mongodatabase', $config);
+    mapPlatformShRabbitMq('rabbitmq', $config);
 
     // Set the Swiftmailer configuration if it's not set already.
     if (!getenv('MAILER_URL')) {
@@ -227,4 +228,22 @@ function mapPlatformShMongoDatabase(string $relationshipName, Config $config): v
     setEnvVar('MONGODB_DB', $credentials['path']);
     setEnvVar('MONGODB_USERNAME', $credentials['username']);
     setEnvVar('MONGODB_PASSWORD', $credentials['password']);
+}
+
+function mapPlatformShRabbitMq(string $relationshipName, Config $config): void
+{
+    if (!$config->hasRelationship($relationshipName)) {
+        return;
+    }
+
+    $credentials = $config->credentials($relationshipName);
+
+    setEnvVar('MESSENGER_TRANSPORT_DSN', sprintf(
+        '%s://%s:%s@%s:%d/%%2f/messages',
+        $credentials['scheme'],
+        $credentials['username'],
+        $credentials['password'],
+        $credentials['host'],
+        $credentials['port']
+    ));
 }
