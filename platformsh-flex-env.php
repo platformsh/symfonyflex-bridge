@@ -47,7 +47,7 @@ function mapPlatformShEnvironment() : void
     // Map services as feasible.
     mapPlatformShDatabase('database', $config);
     mapPlatformShMongoDatabase('mongodatabase', $config);
-    mapPlatformShRabbitMq('rabbitmq', $config);
+    mapPlatformShRabbitMq('rabbitmqqueue', $config);
 
     // Set the Swiftmailer configuration if it's not set already.
     if (!getenv('MAILER_URL')) {
