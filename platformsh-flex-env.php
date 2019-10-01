@@ -129,7 +129,7 @@ function doctrineFormatter(array $credentials) : string
             $dbVersion = (false !== $versionPosition) ? substr($type, $versionPosition + 1) : '10.2';
 
             // Doctrine needs the mariadb-prefix if it's an instance of MariaDB server
-            if ($dbVersion !== '5.5') {
+            if ($dbVersion !== '5.5' && $dbVersion !== '5.7' && $dbVersion !== '8.0') {
                 $dbVersion = sprintf('mariadb-%s', $dbVersion);
             }
 
