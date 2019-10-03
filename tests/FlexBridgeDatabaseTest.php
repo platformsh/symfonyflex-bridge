@@ -84,25 +84,6 @@ class FlexBridgeDatabaseTest extends TestCase
         $this->assertArrayNotHasKey('DATABASE_URL', $_SERVER);
     }
 
-    public function testDatabaseRelationshipOnFoundation1() : void
-    {
-        putenv('PLATFORM_APPLICATION_NAME=test');
-        putenv('PLATFORM_ENVIRONMENT=test');
-        putenv('PLATFORM_PROJECT_ENTROPY=test');
-        putenv('PLATFORM_SMTP_HOST=1.2.3.4');
-
-        $rels = $this->relationships;
-
-        // On Foundation 1 regions there is no `type` key, so make sure nothing dies.
-        unset($rels['database'][0]['type']);
-
-        putenv(sprintf('PLATFORM_RELATIONSHIPS=%s', base64_encode(json_encode($rels))));
-
-        mapPlatformShEnvironment();
-
-        $this->assertEquals('mysql://user:@database.internal:3306/main?charset=utf8mb4&serverVersion=mariadb-10.2.12', $_SERVER['DATABASE_URL']);
-    }
-
     /**
      * @dataProvider databaseVersionsProvider
      */
