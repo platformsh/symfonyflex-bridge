@@ -136,10 +136,6 @@ function doctrineFormatter(array $credentials) : string
             // if MariaDB is in version 10.2, doctrine needs to know it's superior to patch version 6 to work properly
             if ($dbVersion === 'mariadb-10.2') {
                 $dbVersion .= '.12';
-            } else {
-                // Doctrine requires a .z in the version number, but that cannot be detected at runtime.
-                // Hard code a 0 because for everything except MariaDB 10.2, it doesn't actually matter.
-                $dbVersion .= '.0';
             }
 
             $dbUrl .= sprintf('?charset=utf8mb4&serverVersion=%s', $dbVersion);
