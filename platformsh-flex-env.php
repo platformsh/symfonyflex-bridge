@@ -137,6 +137,8 @@ function doctrineFormatter(array $credentials) : string
             if ($dbVersion === 'mariadb-10.2') {
                 $dbVersion .= '.12';
             } else {
+                // Doctrine requires a .z in the version number, but that cannot be detected at runtime.
+                // Hard code a 0 because for everything except MariaDB 10.2, it doesn't actually matter.
                 $dbVersion .= '.0';
             }
 
