@@ -5,9 +5,12 @@ declare(strict_types=1);
 namespace Platformsh\FlexBridge;
 
 use Platformsh\ConfigReader\Config;
-const DEFAULT_MYSQL_ENDPOINT_TYPE = 'mysql:10.2';
 
-const DEFAULT_POSTGRESQL_ENDPOINT_TYPE = 'postgresql:9.6';
+// These are only for the Foundation 1.x regions. If you are using some other version
+// please move to a newer region, where these values will not be needed.
+const DEFAULT_MARIADB_VERSION = '10.2';
+const DEFAULT_MYSQL_VERSION = '8.0';
+const DEFAULT_POSTGRESQL_VERSION = '9.6';
 
 mapPlatformShEnvironment();
 
@@ -108,6 +111,15 @@ function mapPlatformShMailer(Config $config)
     setEnvVar('MAILER_DSN', $mailUrl);
 }
 
+/**
+ * Formatter for Doctrine's DB URL format.
+ *
+ * Note that non-default DB versions are not supported on Foundation 1 regions.
+ * On those regions we cannot derive the version from the credential information
+ * so the hard-coded defaults defined at the top of the file are used. To use a
+ * different version of MariaDB or PostgreSQL, or to use Oracle MySQL at all,
+ * move to a Foundation 3 region.
+ */
 function doctrineFormatter(array $credentials) : string
 {
     $dbUrl = sprintf(
@@ -120,37 +132,53 @@ function doctrineFormatter(array $credentials) : string
         $credentials['path']
     );
 
-    switch ($credentials['scheme']) {
-        case 'mysql':
-            $type = $credentials['type'] ?? DEFAULT_MYSQL_ENDPOINT_TYPE;
-            $versionPosition = strpos($type, ":");
-
-            // If a version is found, use it, otherwise, default to mariadb 10.2.
-            $dbVersion = (false !== $versionPosition) ? substr($type, $versionPosition + 1) : '10.2';
-
-            // Doctrine needs the mariadb-prefix if it's an instance of MariaDB server
-            if ($dbVersion !== '5.5') {
-                $dbVersion = sprintf('mariadb-%s', $dbVersion);
-            }
-
-            // if MariaDB is in version 10.2, doctrine needs to know it's superior to patch version 6 to work properly
-            if ($dbVersion === 'mariadb-10.2') {
-                $dbVersion .= '.12';
-            }
-
-            $dbUrl .= sprintf('?charset=utf8mb4&serverVersion=%s', $dbVersion);
-            break;
-        case 'pgsql':
-            $type = $credentials['type'] ?? DEFAULT_POSTGRESQL_ENDPOINT_TYPE;
-            $versionPosition = strpos($type, ":");
-
-            $dbVersion = (false !== $versionPosition) ? substr($type, $versionPosition + 1) : '11';
-            $dbUrl .= sprintf('?serverVersion=%s', $dbVersion);
-            break;
+    if (isset($credentials['type'])) {
+        list($type, $version) = explode(':', $credentials['type']);
+    }
+    else {
+        $type = $credentials['scheme'];
+        $version = null;
     }
 
-    return $dbUrl;
+    // "mysql" is an alias for MariaDB, so use the same mapper for both.
+    $mappers['mysql'] = __NAMESPACE__ . '\doctrineFormatterMariaDB';
+    $mappers['mariadb'] = __NAMESPACE__ . '\doctrineFormatterMariaDB';
+    $mappers['oracle-mysql'] = __NAMESPACE__ . '\doctrineFormatterOracleMySQL';
+    // The "Scheme" is pgsql, while the type is postgresql. Both end up in the same place.
+    $mappers['pgsql'] = __NAMESPACE__ . '\doctrineFormatterPostgreSQL';
+    $mappers['postgresql'] = __NAMESPACE__ . '\doctrineFormatterPostgreSQL';
 
+    // Add a query suffix that is appropriate to the specific DB type to handle version information.
+    return $dbUrl . $mappers[$type]($version);
+}
+
+function doctrineFormatterMariaDB(?string $version) : string
+{
+    $version = $version ?? DEFAULT_MARIADB_VERSION;
+
+    $version = sprintf('mariadb-%s', $version);
+
+    // Doctrine requires a full version number, even though it doesn't really matter what the patch version is,
+    // except for MariaDB 10.2, where it needs a verison greater than 10.2.6 to avoid certain bugs.
+    $version .= ($version === 'mariadb-10.2') ? '.12' : '.0';
+
+    return sprintf('?charset=utf8mb4&serverVersion=%s', $version);
+}
+
+function doctrineFormatterOracleMySQL(?string $version) : string
+{
+    $version = $version ?? DEFAULT_MYSQL_VERSION;
+
+    return sprintf('?charset=utf8mb4&serverVersion=%s', $version);
+}
+
+function doctrineFormatterPostgreSQL(?string $version) : string
+{
+    $version = $version ?? DEFAULT_POSTGRESQL_VERSION;
+
+    $suffix = sprintf('?serverVersion=%s', $version);
+
+    return $suffix;
 }
 
 /**
