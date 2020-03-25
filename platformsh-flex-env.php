@@ -227,18 +227,6 @@ function setDefaultDoctrineUrl() : void
 /**
  * Maps the specified relationship to a Doctrine MongoDB connection, if available.
  *
- * MongoDB ODM uses a set of discrete environment variables rather than a single DB URL string
- * as in Doctrine ORM.  The related doctrine-odm-bundle settings should be:
- *
- * doctrine_mongodb:
- *     connections:
- *         default:
- *             server: '%env(MONGODB_SERVER)%'
- *             options: { username: '%env(MONGODB_USERNAME)%', password: '%env(MONGODB_PASSWORD)%', authSource: '%env(MONGODB_DB)%' }
- *     default_database: '%env(MONGODB_DB)%'
- *
- * @see https://symfony.com/doc/master/bundles/DoctrineMongoDBBundle/index.html
- *
  * @param string $relationshipName
  *   The MongoDB database relationship name.
  * @param Config $config
