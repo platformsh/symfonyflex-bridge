@@ -25,3 +25,27 @@ composer require platformsh/symfonyflex-bridge
 * The `MAILER_URL` variable is set based on the `PLATFORM_SMTP_HOST` variable.  That will be used by SwiftMailer if it is installed.  If not installed this value will be safely ignored.
 
 * If no `APP_ENV` value is set, it will default to `prod`.
+
+
+## Elasticsearch
+
+If a Platform.sh relationship named `elasticsearch` is defined, it will be taken as an Elasticsearch index and mapped to appropriate environment variables.  Most Elasticsearch packages for Symfony do not have a standard  naming convention for environment variables so you will need to modify your Symfony configuration to read them.
+
+For the common Elastica library, you would add the following to your Symfony `config/services.yaml` file:
+
+```yaml
+# config/services.yaml
+parameters:
+  es_host: '%env(ELASTICSEARCH_HOST)%'
+  es_port: '%env(ELASTICSEARCH_PORT)%'
+```
+
+And then you can reference those parameters in your Elastica configuration file:
+
+```yaml
+# config/packages/fos_elastica.yaml
+fos_elastica:
+    clients:
+        default: { host: '%es_host%', port: '%es_port%' }
+```
+

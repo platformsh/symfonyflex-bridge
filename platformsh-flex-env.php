@@ -258,6 +258,12 @@ function mapPlatformShMongoDatabase(string $relationshipName, Config $config): v
     setEnvVar('MONGODB_PASSWORD', $credentials['password']);
 }
 
+/**
+ * Maps the specified relationship to environment variables for Elasticsearch.
+ *
+ * @param string $relationshipName
+ * @param Config $config
+ */
 function mapPlatformShElasticSearch(string $relationshipName, Config $config): void
 {
     if (!$config->hasRelationship($relationshipName)) {
@@ -267,16 +273,5 @@ function mapPlatformShElasticSearch(string $relationshipName, Config $config): v
     $credentials = $config->credentials($relationshipName);
 
     setEnvVar('ELASTICSEARCH_HOST', $credentials['host']);
-    setEnvVar('ELASTICSEARCH_CLUSTER', $credentials['cluster']);
-    setEnvVar('ELASTICSEARCH_SERVICE', $credentials['service']);
-    setEnvVar('ELASTICSEARCH_REL', $credentials['rel']);
     setEnvVar('ELASTICSEARCH_PORT', (string)$credentials['port']);
-    setEnvVar('ELASTICSEARCH_IP', $credentials['ip']);
-    setEnvVar('ELASTICSEARCH_SCHEME', $credentials['scheme']);
-    setEnvVar('ELASTICSEARCH_URL', sprintf(
-        '%s://%s:%d',
-        $credentials['scheme'],
-        $credentials['host'],
-        $credentials['port']
-    ));
 }
