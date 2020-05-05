@@ -28,5 +28,6 @@
     },
     "require-dev": {
         "phpunit/phpunit": "^7.4"
-    }
+    },
+    "bin": ["bin/set-platformsh-vars.sh"]
 }
