@@ -16,9 +16,9 @@ composer require platformsh/symfonyflex-bridge
 
 ## Mappings performed
 
-* If a Platform.sh relationship named `database` is defined, it will be taken as an SQL database and mapped to the `DATABASE_URL` environment variable for Symfony Flex.  (Note: Due to a bug in Doctrine, the code currently assumes MariaDB 10.2 as the service version.  If that Doctrine bug is ever resolved this hard-coding can be removed.)
+* If a Platform.sh relationship named `database` or an environment variable APP_DB_USERNAME corresponding to a relationship is defined, it will be taken as an SQL database and mapped to the `DATABASE_URL` environment variable for Symfony Flex.  (Note: Due to a bug in Doctrine, the code currently assumes MariaDB 10.2 as the service version.  If that Doctrine bug is ever resolved this hard-coding can be removed.)
 
-* If a Platform.sh relationship named `mongodatabase` is defined, it will be taken as a Doctrine ODM database and mapped to the appropriate environment variables.  Note that you may still need to reference those environment variables in your configuration if they are not defined by default.  See the [DoctrineMongoDBBundle](https://symfony.com/doc/master/bundles/DoctrineMongoDBBundle/index.html) documentation for more details.
+* If a Platform.sh relationship named `mongodatabase` or an environment variable APP_MONGODB_USERNAME corresponding to a relationship is defined, it will be taken as a Doctrine ODM database and mapped to the appropriate environment variables.  Note that you may still need to reference those environment variables in your configuration if they are not defined by default.  See the [DoctrineMongoDBBundle](https://symfony.com/doc/master/bundles/DoctrineMongoDBBundle/index.html) documentation for more details.
 
 * The Symfony Flex `APP_SECRET` is set based on the `PLATFORM_PROJECT_ENTROPY` variable, which is provided for exactly this purpose.
 

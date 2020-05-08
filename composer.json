@@ -14,12 +14,18 @@
         "platformsh/config-reader": "^2.1.0"
     },
     "autoload": {
-        "files": ["platformsh-flex-env.php"]
+        "files": [
+            "PlatformshFlexEnv.php",
+            "platformsh-flex-env.php"
+        ]
     },
     "autoload-dev": {
         "psr-4": {
             "Platformsh\\FlexBridge\\Tests\\": "tests/"
-        }
+        },
+        "files": [
+            "platformsh-flex-env-backward-compatible.php"
+        ]
     },
     "extra": {
         "branch-alias": {
