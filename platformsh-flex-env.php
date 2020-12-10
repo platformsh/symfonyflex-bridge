@@ -50,6 +50,7 @@ function mapPlatformShEnvironment() : void
     // Map services as feasible.
     mapPlatformShDatabase('database', $config);
     mapPlatformShMongoDatabase('mongodatabase', $config);
+    mapPlatformShElasticSearch('elasticsearch', $config);
 
     // Set the Swiftmailer configuration if it's not set already.
     if (!getenv('MAILER_URL')) {
@@ -226,18 +227,6 @@ function setDefaultDoctrineUrl() : void
 /**
  * Maps the specified relationship to a Doctrine MongoDB connection, if available.
  *
- * MongoDB ODM uses a set of discrete environment variables rather than a single DB URL string
- * as in Doctrine ORM.  The related doctrine-odm-bundle settings should be:
- *
- * doctrine_mongodb:
- *     connections:
- *         default:
- *             server: '%env(MONGODB_SERVER)%'
- *             options: { username: '%env(MONGODB_USERNAME)%', password: '%env(MONGODB_PASSWORD)%', authSource: '%env(MONGODB_DB)%' }
- *     default_database: '%env(MONGODB_DB)%'
- *
- * @see https://symfony.com/doc/master/bundles/DoctrineMongoDBBundle/index.html
- *
  * @param string $relationshipName
  *   The MongoDB database relationship name.
  * @param Config $config
@@ -255,4 +244,22 @@ function mapPlatformShMongoDatabase(string $relationshipName, Config $config): v
     setEnvVar('MONGODB_DB', $credentials['path']);
     setEnvVar('MONGODB_USERNAME', $credentials['username']);
     setEnvVar('MONGODB_PASSWORD', $credentials['password']);
+}
+
+/**
+ * Maps the specified relationship to environment variables for Elasticsearch.
+ *
+ * @param string $relationshipName
+ * @param Config $config
+ */
+function mapPlatformShElasticSearch(string $relationshipName, Config $config): void
+{
+    if (!$config->hasRelationship($relationshipName)) {
+        return;
+    }
+
+    $credentials = $config->credentials($relationshipName);
+
+    setEnvVar('ELASTICSEARCH_HOST', $credentials['host']);
+    setEnvVar('ELASTICSEARCH_PORT', (string)$credentials['port']);
 }
