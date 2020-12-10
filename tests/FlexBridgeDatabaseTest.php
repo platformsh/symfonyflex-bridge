@@ -15,7 +15,7 @@ class FlexBridgeDatabaseTest extends TestCase
     protected $relationships;
     protected $defaultDbUrl;
 
-    public function setUp()
+    public function setUp(): void
     {
         parent::setUp();
 
