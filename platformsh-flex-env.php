@@ -34,6 +34,7 @@ function mapPlatformShEnvironment() : void
     }
 
     $config->registerFormatter('doctrine', __NAMESPACE__ . '\doctrineFormatter');
+    $config->registerFormatter('rabbitmq', __NAMESPACE__ . '\rabbitMqFormatter');
 
     // Set the application secret if it's not already set.
     // We force re-setting the APP_SECRET to ensure it's set in all of PHP's various
@@ -51,6 +52,7 @@ function mapPlatformShEnvironment() : void
     mapPlatformShDatabase('database', $config);
     mapPlatformShMongoDatabase('mongodatabase', $config);
     mapPlatformShElasticSearch('elasticsearch', $config);
+    mapPlatformShRabbitMq('rabbitmqqueue', $config);
 
     // Set the Swiftmailer configuration if it's not set already.
     if (!getenv('MAILER_URL')) {
@@ -110,6 +112,25 @@ function mapPlatformShMailer(Config $config)
     );
 
     setEnvVar('MAILER_DSN', $mailUrl);
+}
+
+/**
+ * Formatter for the Symfony RabbitMQ Messenger format.
+ *
+ * The %2f default vhost is not a formatting code, but a URL-encoded
+ * forward slash (/), which is the default vhost name in RabbitMQ.
+ * It's a weird default name, but it's what RabbitMQ uses.
+ */
+function rabbitMqFormatter(array $credentials): string
+{
+    return sprintf('%s://%s:%s@%s:%d/%s/messages',
+        $credentials['scheme'],
+        $credentials['username'],
+        $credentials['password'],
+        $credentials['host'],
+        $credentials['port'],
+        $credentials['vhost'] ?? '%2f'
+    );
 }
 
 /**
@@ -200,6 +221,23 @@ function mapPlatformShDatabase(string $relationshipName, Config $config) : void
 }
 
 /**
+ * Maps the specified relationship to the DATABASE_URL environment variable, if available.
+ *
+ * @param string $relationshipName
+ *   The database relationship name.
+ * @param Config $config
+ *   The config object.
+ */
+function mapPlatformShRabbitMq(string $relationshipName, Config $config) : void
+{
+    if (!$config->hasRelationship($relationshipName)) {
+        return;
+    }
+
+    setEnvVar('MESSENGER_TRANSPORT_DSN', $config->formattedCredentials($relationshipName, 'rabbitmq'));
+}
+
+/**
  * Sets a default Doctrine URL.
  *
  * Doctrine needs a well-formed URL string with a database version even in the build hook.
@@ -263,3 +301,4 @@ function mapPlatformShElasticSearch(string $relationshipName, Config $config): v
     setEnvVar('ELASTICSEARCH_HOST', $credentials['host']);
     setEnvVar('ELASTICSEARCH_PORT', (string)$credentials['port']);
 }
+
