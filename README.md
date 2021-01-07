@@ -59,3 +59,7 @@ doctrine_mongodb:
             options: { username: '%env(MONGODB_USERNAME)%', password: '%env(MONGODB_PASSWORD)%', authSource: '%env(MONGODB_DB)%' }
     default_database: '%env(MONGODB_DB)%'
 ```
+
+# RabbitMQ
+
+If a Platform.sh relationship named `rabbitmqqueue` is defined, it will be taken as a RabbitMQ messenger backend and mapped to the appropriate environment variable.
