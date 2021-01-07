@@ -34,7 +34,7 @@ class FlexBridgeRabbitMqTest extends TestCase
 
     }
 
-    public function testNotOnPlatformshDoesNotSetDatabase(): void
+    public function testNotOnPlatformshDoesNotSetEnvVar(): void
     {
         mapPlatformShEnvironment();
 
@@ -58,7 +58,7 @@ class FlexBridgeRabbitMqTest extends TestCase
         $this->assertArrayNotHasKey('MESSENGER_TRANSPORT_DSN', $_SERVER);
     }
 
-    public function testElasticsearchRelationshipSet(): void
+    public function testRelationshipSet(): void
     {
         putenv('PLATFORM_APPLICATION_NAME=test');
         putenv('PLATFORM_ENVIRONMENT=test');
