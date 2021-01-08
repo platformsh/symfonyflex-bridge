@@ -221,7 +221,7 @@ function mapPlatformShDatabase(string $relationshipName, Config $config) : void
 }
 
 /**
- * Maps the specified relationship to the DATABASE_URL environment variable, if available.
+ * Maps the specified relationship to the MESSENGER_TRANSPORT_DSN environment variable, if available.
  *
  * @param string $relationshipName
  *   The database relationship name.
@@ -301,4 +301,3 @@ function mapPlatformShElasticSearch(string $relationshipName, Config $config): v
     setEnvVar('ELASTICSEARCH_HOST', $credentials['host']);
     setEnvVar('ELASTICSEARCH_PORT', (string)$credentials['port']);
 }
-
