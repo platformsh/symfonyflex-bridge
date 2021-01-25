@@ -53,6 +53,7 @@ function mapPlatformShEnvironment() : void
     mapPlatformShMongoDatabase('mongodatabase', $config);
     mapPlatformShElasticSearch('elasticsearch', $config);
     mapPlatformShRabbitMq('rabbitmqqueue', $config);
+    mapPlatformShSolr('solr', $config);
 
     // Set the Swiftmailer configuration if it's not set already.
     if (!getenv('MAILER_URL')) {
@@ -300,4 +301,22 @@ function mapPlatformShElasticSearch(string $relationshipName, Config $config): v
 
     setEnvVar('ELASTICSEARCH_HOST', $credentials['host']);
     setEnvVar('ELASTICSEARCH_PORT', (string)$credentials['port']);
+}
+
+/**
+ * Maps the specified relationship to environment variables for Solr.
+ *
+ * @param string $relationshipName
+ * @param Config $config
+ */
+function mapPlatformShSolr(string $relationshipName, Config $config): void
+{
+    if (!$config->hasRelationship($relationshipName)) {
+        return;
+    }
+
+    $credentials = $config->credentials($relationshipName);
+
+    setEnvVar('SOLR_DSN', sprintf('http://%s:%d/solr', $credentials['host'], $credentials['port']));
+    setEnvVar('SOLR_CORE', $credentials['rel']);
 }
