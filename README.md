@@ -63,3 +63,31 @@ doctrine_mongodb:
 # RabbitMQ
 
 If a Platform.sh relationship named `rabbitmqqueue` is defined, it will be taken as a RabbitMQ messenger backend and mapped to the appropriate environment variable.
+
+## Solr
+
+If a Platform.sh relationship named `solr` is defined, it will be taken as a Solr index and mapped to appropriate environment variables.
+
+For the common uses, you would add the following to your Symfony `config/services.yaml` file:
+
+```yaml
+# config/services.yaml
+parameters:
+    solr_dsn: '%env(SOLR_DSN)%'
+    solr_core: '%env(SOLR_CORE)%'
+```
+
+And then you can reference those parameters in your configuration file:
+
+```yaml
+# config/packages/search_engine_solr.yaml
+search_engine_solr:
+    endpoints:
+        endpoint0:
+            dsn: '%solr_dsn%'
+            core: '%solr_core%'
+    connections:
+        default:
+            entry_endpoints:
+                - endpoint0
+```
