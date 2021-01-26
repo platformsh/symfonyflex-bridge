@@ -54,6 +54,8 @@ function mapPlatformShEnvironment() : void
     mapPlatformShElasticSearch('elasticsearch', $config);
     mapPlatformShRabbitMq('rabbitmqqueue', $config);
     mapPlatformShSolr('solr', $config);
+    mapPlatformShRedisSession(['redis_session', 'redis'], $config);
+    mapPlatformShRedisCache(['redis_cache', 'redis'], $config);
 
     // Set the Swiftmailer configuration if it's not set already.
     if (!getenv('MAILER_URL')) {
@@ -319,4 +321,57 @@ function mapPlatformShSolr(string $relationshipName, Config $config): void
 
     setEnvVar('SOLR_DSN', sprintf('http://%s:%d/solr', $credentials['host'], $credentials['port']));
     setEnvVar('SOLR_CORE', $credentials['rel']);
+}
+
+/**
+ * Maps the specified relationship to environment variables for Redis.
+ *
+ * @param string $relationshipNames
+ * @param Config $config
+ */
+function mapPlatformShRedisSession(array $relationshipNames, Config $config): void
+{
+    if (!($relationshipName = hasOneRelationship($relationshipNames, $config))) {
+        return;
+    }
+
+    $credentials = $config->credentials($relationshipName);
+
+    setEnvVar('SESSION_REDIS_HOST', $credentials['host']);
+    setEnvVar('SESSION_REDIS_PORT', $credentials['port']);
+}
+
+/**
+ * Maps the specified relationship to environment variables for Redis.
+ *
+ * @param string $relationshipNames
+ * @param Config $config
+ */
+function mapPlatformShRedisCache(array $relationshipNames, Config $config): void
+{
+    if (!($relationshipName = hasOneRelationship($relationshipNames, $config))) {
+        return;
+    }
+
+    $credentials = $config->credentials($relationshipName);
+
+    setEnvVar('CACHE_DSN', sprintf('%s:%d', $credentials['host'], $credentials['port']));
+}
+
+
+/**
+ * Will work out if a given config object has any of the given relationships giving precedence to items closer in the array
+ *
+ * @param array $relationshipNames
+ * @param Config $config
+ * @return string|bool The relationship name or false if no relationships given
+ */
+function hasOneRelationship(array $relationshipNames, Config $config){
+    foreach($relationshipNames as $relationshipName){
+        if($config->hasRelationship($relationshipName)){
+            return $relationshipName;
+        }
+    }
+
+    return false;
 }
