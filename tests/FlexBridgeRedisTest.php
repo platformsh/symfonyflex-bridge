@@ -48,43 +48,6 @@ class FlexBridgeRedisTest extends TestCase
         $this->assertArrayNotHasKey('SESSION_REDIS_PORT', $_SERVER);
     }
 
-    public function testRelationshipSet(): void
-    {
-        putenv('PLATFORM_APPLICATION_NAME=test');
-        putenv('PLATFORM_ENVIRONMENT=test');
-        putenv('PLATFORM_PROJECT_ENTROPY=test');
-        putenv('PLATFORM_SMTP_HOST=1.2.3.4');
-
-        $rels = $this->relationships;
-        $rels['redis'] = [$this->getMockRedisRelation('redis')];
-        putenv(sprintf('PLATFORM_RELATIONSHIPS=%s', base64_encode(json_encode($rels))));
-
-        mapPlatformShEnvironment();
-
-        $this->assertEquals('redis.internal:6379', $_SERVER['CACHE_DSN']);
-        $this->assertEquals('redis.internal', $_SERVER['SESSION_REDIS_HOST']);
-        $this->assertEquals('6379', $_SERVER['SESSION_REDIS_PORT']);
-    }
-
-    public function testRelationshipOverrideSession(): void
-    {
-        putenv('PLATFORM_APPLICATION_NAME=test');
-        putenv('PLATFORM_ENVIRONMENT=test');
-        putenv('PLATFORM_PROJECT_ENTROPY=test');
-        putenv('PLATFORM_SMTP_HOST=1.2.3.4');
-
-        $rels = $this->relationships;
-        $rels['redis_session'] = [$this->getMockRedisRelation('redis_session', 123456)];
-        $rels['redis'] = [$this->getMockRedisRelation('redis')];
-        putenv(sprintf('PLATFORM_RELATIONSHIPS=%s', base64_encode(json_encode($rels))));
-
-        mapPlatformShEnvironment();
-
-        $this->assertEquals('redis.internal:6379', $_SERVER['CACHE_DSN']);
-        $this->assertEquals('redis_session.internal', $_SERVER['SESSION_REDIS_HOST']);
-        $this->assertEquals('123456', $_SERVER['SESSION_REDIS_PORT']);
-    }
-
     public function testRelationshipSessionOnly(): void
     {
         putenv('PLATFORM_APPLICATION_NAME=test');
@@ -93,33 +56,14 @@ class FlexBridgeRedisTest extends TestCase
         putenv('PLATFORM_SMTP_HOST=1.2.3.4');
 
         $rels = $this->relationships;
-        $rels['redis_session'] = [$this->getMockRedisRelation('redis_session', 123456)];
+        $rels['redissession'] = [$this->getMockRedisRelation('redissession', 123456)];
         putenv(sprintf('PLATFORM_RELATIONSHIPS=%s', base64_encode(json_encode($rels))));
 
         mapPlatformShEnvironment();
 
         $this->assertArrayNotHasKey('CACHE_DSN', $_SERVER);
-        $this->assertEquals('redis_session.internal', $_SERVER['SESSION_REDIS_HOST']);
+        $this->assertEquals('redissession.internal', $_SERVER['SESSION_REDIS_HOST']);
         $this->assertEquals('123456', $_SERVER['SESSION_REDIS_PORT']);
-    }
-
-    public function testRelationshipOverrideCache(): void
-    {
-        putenv('PLATFORM_APPLICATION_NAME=test');
-        putenv('PLATFORM_ENVIRONMENT=test');
-        putenv('PLATFORM_PROJECT_ENTROPY=test');
-        putenv('PLATFORM_SMTP_HOST=1.2.3.4');
-
-        $rels = $this->relationships;
-        $rels['redis_cache'] = [$this->getMockRedisRelation('redis_cache', 1234567)];
-        $rels['redis'] = [$this->getMockRedisRelation('redis')];
-        putenv(sprintf('PLATFORM_RELATIONSHIPS=%s', base64_encode(json_encode($rels))));
-
-        mapPlatformShEnvironment();
-
-        $this->assertEquals('redis_cache.internal:1234567', $_SERVER['CACHE_DSN']);
-        $this->assertEquals('redis.internal', $_SERVER['SESSION_REDIS_HOST']);
-        $this->assertEquals('6379', $_SERVER['SESSION_REDIS_PORT']);
     }
 
     public function testRelationshipOverrideCacheOnly(): void
@@ -130,12 +74,12 @@ class FlexBridgeRedisTest extends TestCase
         putenv('PLATFORM_SMTP_HOST=1.2.3.4');
 
         $rels = $this->relationships;
-        $rels['redis_cache'] = [$this->getMockRedisRelation('redis_cache', 1234567)];
+        $rels['rediscache'] = [$this->getMockRedisRelation('rediscache', 1234567)];
         putenv(sprintf('PLATFORM_RELATIONSHIPS=%s', base64_encode(json_encode($rels))));
 
         mapPlatformShEnvironment();
 
-        $this->assertEquals('redis_cache.internal:1234567', $_SERVER['CACHE_DSN']);
+        $this->assertEquals('rediscache.internal:1234567', $_SERVER['CACHE_DSN']);
         $this->assertArrayNotHasKey('SESSION_REDIS_HOST', $_SERVER);
         $this->assertArrayNotHasKey('SESSION_REDIS_PORT', $_SERVER);
     }
@@ -148,34 +92,14 @@ class FlexBridgeRedisTest extends TestCase
         putenv('PLATFORM_SMTP_HOST=1.2.3.4');
 
         $rels = $this->relationships;
-        $rels['redis_cache'] = [$this->getMockRedisRelation('redis_cache', 1234567)];
-        $rels['redis_session'] = [$this->getMockRedisRelation('redis_session', 123456)];
-        $rels['redis'] = [$this->getMockRedisRelation('redis')];
+        $rels['rediscache'] = [$this->getMockRedisRelation('rediscache', 1234567)];
+        $rels['redissession'] = [$this->getMockRedisRelation('redissession', 123456)];
         putenv(sprintf('PLATFORM_RELATIONSHIPS=%s', base64_encode(json_encode($rels))));
 
         mapPlatformShEnvironment();
 
-        $this->assertEquals('redis_cache.internal:1234567', $_SERVER['CACHE_DSN']);
-        $this->assertEquals('redis_session.internal', $_SERVER['SESSION_REDIS_HOST']);
-        $this->assertEquals('123456', $_SERVER['SESSION_REDIS_PORT']);
-    }
-
-    public function testRelationshipBothNoFallback(): void
-    {
-        putenv('PLATFORM_APPLICATION_NAME=test');
-        putenv('PLATFORM_ENVIRONMENT=test');
-        putenv('PLATFORM_PROJECT_ENTROPY=test');
-        putenv('PLATFORM_SMTP_HOST=1.2.3.4');
-
-        $rels = $this->relationships;
-        $rels['redis_cache'] = [$this->getMockRedisRelation('redis_cache', 1234567)];
-        $rels['redis_session'] = [$this->getMockRedisRelation('redis_session', 123456)];
-        putenv(sprintf('PLATFORM_RELATIONSHIPS=%s', base64_encode(json_encode($rels))));
-
-        mapPlatformShEnvironment();
-
-        $this->assertEquals('redis_cache.internal:1234567', $_SERVER['CACHE_DSN']);
-        $this->assertEquals('redis_session.internal', $_SERVER['SESSION_REDIS_HOST']);
+        $this->assertEquals('rediscache.internal:1234567', $_SERVER['CACHE_DSN']);
+        $this->assertEquals('redissession.internal', $_SERVER['SESSION_REDIS_HOST']);
         $this->assertEquals('123456', $_SERVER['SESSION_REDIS_PORT']);
     }
 

@@ -54,8 +54,8 @@ function mapPlatformShEnvironment() : void
     mapPlatformShElasticSearch('elasticsearch', $config);
     mapPlatformShRabbitMq('rabbitmqqueue', $config);
     mapPlatformShSolr('solr', $config);
-    mapPlatformShRedisSession(['redis_session', 'redis'], $config);
-    mapPlatformShRedisCache(['redis_cache', 'redis'], $config);
+    mapPlatformShRedisSession('redissession', $config);
+    mapPlatformShRedisCache('rediscache', $config);
 
     // Set the Swiftmailer configuration if it's not set already.
     if (!getenv('MAILER_URL')) {
@@ -326,12 +326,12 @@ function mapPlatformShSolr(string $relationshipName, Config $config): void
 /**
  * Maps the specified relationship to environment variables for Redis sessions.
  *
- * @param string $relationshipNames
+ * @param string $relationshipName
  * @param Config $config
  */
-function mapPlatformShRedisSession(array $relationshipNames, Config $config): void
+function mapPlatformShRedisSession(string $relationshipName, Config $config): void
 {
-    if (!($relationshipName = hasOneRelationship($relationshipNames, $config))) {
+    if (!$config->hasRelationship($relationshipName)) {
         return;
     }
 
@@ -344,34 +344,16 @@ function mapPlatformShRedisSession(array $relationshipNames, Config $config): vo
 /**
  * Maps the specified relationship to environment variables for Redis cache.
  *
- * @param string $relationshipNames
+ * @param string $relationshipName
  * @param Config $config
  */
-function mapPlatformShRedisCache(array $relationshipNames, Config $config): void
+function mapPlatformShRedisCache(string $relationshipName, Config $config): void
 {
-    if (!($relationshipName = hasOneRelationship($relationshipNames, $config))) {
+    if (!$config->hasRelationship($relationshipName, $config)) {
         return;
     }
 
     $credentials = $config->credentials($relationshipName);
 
     setEnvVar('CACHE_DSN', sprintf('%s:%d', $credentials['host'], $credentials['port']));
-}
-
-/**
- * Will work out if a given config object has any of the given relationships giving precedence to items first in the array
- *
- * @param array $relationshipNames
- * @param Config $config
- * @return string|bool The relationship name or false if no relationships given
- */
-function hasOneRelationship(array $relationshipNames, Config $config)
-{
-    foreach ($relationshipNames as $relationshipName) {
-        if ($config->hasRelationship($relationshipName)) {
-            return $relationshipName;
-        }
-    }
-
-    return false;
 }
