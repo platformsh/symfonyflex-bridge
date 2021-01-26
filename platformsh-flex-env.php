@@ -338,7 +338,7 @@ function mapPlatformShRedisSession(array $relationshipNames, Config $config): vo
     $credentials = $config->credentials($relationshipName);
 
     setEnvVar('SESSION_REDIS_HOST', $credentials['host']);
-    setEnvVar('SESSION_REDIS_PORT', $credentials['port']);
+    setEnvVar('SESSION_REDIS_PORT', (string)$credentials['port']);
 }
 
 /**
