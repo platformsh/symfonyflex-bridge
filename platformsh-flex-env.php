@@ -324,7 +324,7 @@ function mapPlatformShSolr(string $relationshipName, Config $config): void
 }
 
 /**
- * Maps the specified relationship to environment variables for Redis.
+ * Maps the specified relationship to environment variables for Redis sessions.
  *
  * @param string $relationshipNames
  * @param Config $config
@@ -342,7 +342,7 @@ function mapPlatformShRedisSession(array $relationshipNames, Config $config): vo
 }
 
 /**
- * Maps the specified relationship to environment variables for Redis.
+ * Maps the specified relationship to environment variables for Redis cache.
  *
  * @param string $relationshipNames
  * @param Config $config
@@ -358,17 +358,17 @@ function mapPlatformShRedisCache(array $relationshipNames, Config $config): void
     setEnvVar('CACHE_DSN', sprintf('%s:%d', $credentials['host'], $credentials['port']));
 }
 
-
 /**
- * Will work out if a given config object has any of the given relationships giving precedence to items closer in the array
+ * Will work out if a given config object has any of the given relationships giving precedence to items first in the array
  *
  * @param array $relationshipNames
  * @param Config $config
  * @return string|bool The relationship name or false if no relationships given
  */
-function hasOneRelationship(array $relationshipNames, Config $config){
-    foreach($relationshipNames as $relationshipName){
-        if($config->hasRelationship($relationshipName)){
+function hasOneRelationship(array $relationshipNames, Config $config)
+{
+    foreach ($relationshipNames as $relationshipName) {
+        if ($config->hasRelationship($relationshipName)) {
             return $relationshipName;
         }
     }

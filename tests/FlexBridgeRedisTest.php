@@ -1,4 +1,5 @@
 <?php
+
 declare(strict_types=1);
 
 namespace Platformsh\FlexBridge\Tests;
@@ -18,7 +19,6 @@ class FlexBridgeRedisTest extends TestCase
 
         $this->relationships = [];
         $this->defaultValues = [];
-
     }
 
     public function testNotOnPlatformshDoesNotSetEnvVar(): void
@@ -122,7 +122,7 @@ class FlexBridgeRedisTest extends TestCase
         $this->assertEquals('6379', $_SERVER['SESSION_REDIS_PORT']);
     }
 
-    public function testRelationshipOverrideCacheNoSession(): void
+    public function testRelationshipOverrideCacheOnly(): void
     {
         putenv('PLATFORM_APPLICATION_NAME=test');
         putenv('PLATFORM_ENVIRONMENT=test');
@@ -179,7 +179,8 @@ class FlexBridgeRedisTest extends TestCase
         $this->assertEquals('123456', $_SERVER['SESSION_REDIS_PORT']);
     }
 
-    protected function getMockRedisRelation(string $relationshipName, int $port = 6379){
+    protected function getMockRedisRelation(string $relationshipName, int $port = 6379): array
+    {
         return [
             "service" => $relationshipName,
             "ip" => "203.0.113.0",
