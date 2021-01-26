@@ -60,7 +60,7 @@ doctrine_mongodb:
     default_database: '%env(MONGODB_DB)%'
 ```
 
-# RabbitMQ
+## RabbitMQ
 
 If a Platform.sh relationship named `rabbitmqqueue` is defined, it will be taken as a RabbitMQ messenger backend and mapped to the appropriate environment variable.
 
@@ -93,7 +93,7 @@ search_engine_solr:
 ```
 
 
-# Redis Cache
+## Redis Cache
 If a Platform.sh relationship named `rediscache` is defined, it will be taken as a the storage engine for a cache pool. 
 
 For typical use you will need to define a file looking like this:
