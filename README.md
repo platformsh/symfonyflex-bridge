@@ -94,6 +94,7 @@ search_engine_solr:
 
 
 ## Redis Cache
+
 If a Platform.sh relationship named `rediscache` is defined, it will be taken as a the storage engine for a cache pool. 
 
 For typical use you will need to define a file looking like this:
@@ -111,7 +112,8 @@ services:
 ```
 For more details see [here](https://symfony.com/doc/current/components/cache/adapters/redis_adapter.html)
 
-# Redis session storage
+## Redis session storage
+
 If a Platform.sh relationship named `redissession` is defined, it will be taken as a the storage engine for symfony session.
 
 For typical use you will need to add a couple of service definitions which looks like this:
