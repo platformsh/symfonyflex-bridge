@@ -54,6 +54,8 @@ function mapPlatformShEnvironment() : void
     mapPlatformShElasticSearch('elasticsearch', $config);
     mapPlatformShRabbitMq('rabbitmqqueue', $config);
     mapPlatformShSolr('solr', $config);
+    mapPlatformShRedisSession('redissession', $config);
+    mapPlatformShRedisCache('rediscache', $config);
 
     // Set the Swiftmailer configuration if it's not set already.
     if (!getenv('MAILER_URL')) {
@@ -319,4 +321,39 @@ function mapPlatformShSolr(string $relationshipName, Config $config): void
 
     setEnvVar('SOLR_DSN', sprintf('http://%s:%d/solr', $credentials['host'], $credentials['port']));
     setEnvVar('SOLR_CORE', $credentials['rel']);
+}
+
+/**
+ * Maps the specified relationship to environment variables for Redis sessions.
+ *
+ * @param string $relationshipName
+ * @param Config $config
+ */
+function mapPlatformShRedisSession(string $relationshipName, Config $config): void
+{
+    if (!$config->hasRelationship($relationshipName)) {
+        return;
+    }
+
+    $credentials = $config->credentials($relationshipName);
+
+    setEnvVar('SESSION_REDIS_HOST', $credentials['host']);
+    setEnvVar('SESSION_REDIS_PORT', (string)$credentials['port']);
+}
+
+/**
+ * Maps the specified relationship to environment variables for Redis cache.
+ *
+ * @param string $relationshipName
+ * @param Config $config
+ */
+function mapPlatformShRedisCache(string $relationshipName, Config $config): void
+{
+    if (!$config->hasRelationship($relationshipName, $config)) {
+        return;
+    }
+
+    $credentials = $config->credentials($relationshipName);
+
+    setEnvVar('CACHE_DSN', sprintf('%s:%d', $credentials['host'], $credentials['port']));
 }

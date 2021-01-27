@@ -60,7 +60,7 @@ doctrine_mongodb:
     default_database: '%env(MONGODB_DB)%'
 ```
 
-# RabbitMQ
+## RabbitMQ
 
 If a Platform.sh relationship named `rabbitmqqueue` is defined, it will be taken as a RabbitMQ messenger backend and mapped to the appropriate environment variable.
 
@@ -91,3 +91,52 @@ search_engine_solr:
             entry_endpoints:
                 - endpoint0
 ```
+
+
+## Redis Cache
+
+If a Platform.sh relationship named `rediscache` is defined, it will be taken as a the storage engine for a cache pool. 
+
+For typical use you will need to define a file looking like this:
+
+```yaml
+#config/packages/cache_pool/cache.redis.yaml
+parameters:
+    cache_dsn: '%env(CACHE_DSN)%'
+
+services:
+    cache.redis:
+        public: true
+        class: Symfony\Component\Cache\Adapter\RedisTagAwareAdapter
+        parent: cache.adapter.redis
+```
+For more details see [here](https://symfony.com/doc/current/components/cache/adapters/redis_adapter.html)
+
+## Redis session storage
+
+If a Platform.sh relationship named `redissession` is defined, it will be taken as a the storage engine for symfony session.
+
+For typical use you will need to add a couple of service definitions which looks like this:
+```yaml
+# config/services.yaml
+services:
+    # ...
+    Redis:
+        class: Redis
+        calls:
+            - connect:
+                - '%env(SESSION_REDIS_HOST)%'
+                - '%env(int:SESSION_REDIS_PORT)%'
+    Symfony\Component\HttpFoundation\Session\Storage\Handler\RedisSessionHandler:
+        arguments:
+            - '@Redis'
+```
+Then to configure symfony to use the new redis handler
+```yaml
+# config/packages/framework.yaml
+framework:
+    session:
+        handler_id: Symfony\Component\HttpFoundation\Session\Storage\Handler\RedisSessionHandler
+```
+
+For more details see [here](https://symfony.com/doc/current/session/database.html#store-sessions-in-a-key-value-database-redis)
