@@ -48,8 +48,12 @@ function mapPlatformShEnvironment() : void
     $appEnv = getenv('APP_ENV') ?: 'prod';
     setEnvVar('APP_ENV', $appEnv);
 
+
     // Map services as feasible.
-    mapPlatformShDatabase('database', $config);
+    foreach (getDatabaseRelationships() as $relationship) {
+        mapPlatformShDatabase($relationship, $config);
+    }
+
     mapPlatformShMongoDatabase('mongodatabase', $config);
     mapPlatformShElasticSearch('elasticsearch', $config);
     mapPlatformShRabbitMq('rabbitmqqueue', $config);
@@ -66,6 +70,22 @@ function mapPlatformShEnvironment() : void
     if (!getenv('MAILER_DSN')) {
         mapPlatformShMailer($config);
     }
+}
+
+/**
+ * Returns an array of relationships for which to configure database connection
+ * variables.
+ *
+ * This function looks for a DATABASE_RELATIONSHIPS environment variable
+ * containing a comma-separated list of database relationships to configure. If
+ * this relationship is not found, it defaults to a single 'database' relationship.
+ *
+ * @return array|string[]
+ *   An array of database relationships to configure.
+ */
+function getDatabaseRelationships() {
+    $relationships = getenv('DATABASE_RELATIONSHIPS') ?: 'database';
+    return explode(',', $relationships);
 }
 
 /**
@@ -207,7 +227,13 @@ function doctrineFormatterPostgreSQL(?string $version) : string
 }
 
 /**
- * Maps the specified relationship to the DATABASE_URL environment variable, if available.
+ * Maps the specified relationship to an appropriate environment variable, if
+ * available.
+ *
+ * The environment variable is named based on the relationship name by casting
+ * to uppercase and appending '_URL' to the name. For example, a relationship
+ * named 'database' will be exposed as DATABASE_URL while a relationship named
+ * 'database_legacy' will be exposed as DATABASE_LEGACY_URL.
  *
  * @param string $relationshipName
  *   The database relationship name.
@@ -220,7 +246,8 @@ function mapPlatformShDatabase(string $relationshipName, Config $config) : void
         return;
     }
 
-    setEnvVar('DATABASE_URL', $config->formattedCredentials($relationshipName, 'doctrine'));
+    $varName = strtoupper($relationshipName) . '_URL';
+    setEnvVar($varName, $config->formattedCredentials($relationshipName, 'doctrine'));
 }
 
 /**
