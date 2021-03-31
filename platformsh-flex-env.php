@@ -48,7 +48,6 @@ function mapPlatformShEnvironment() : void
     $appEnv = getenv('APP_ENV') ?: 'prod';
     setEnvVar('APP_ENV', $appEnv);
 
-
     // Map services as feasible.
     foreach (getDatabaseRelationships() as $relationship) {
         mapPlatformShDatabase($relationship, $config);
