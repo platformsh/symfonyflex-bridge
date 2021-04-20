@@ -320,7 +320,12 @@ function mapPlatformShSolr(string $relationshipName, Config $config): void
     $credentials = $config->credentials($relationshipName);
 
     setEnvVar('SOLR_DSN', sprintf('http://%s:%d/solr', $credentials['host'], $credentials['port']));
-    setEnvVar('SOLR_CORE', $credentials['rel']);
+    
+    if(isset($credentials['rel'])) {
+        setEnvVar('SOLR_CORE', $credentials['rel']);
+    } else {
+        setEnvVar('SOLR_CORE', substr($credentials['path'], 5)); // 'path' will have `solr/core`, we want to extract `core`
+    }
 }
 
 /**
