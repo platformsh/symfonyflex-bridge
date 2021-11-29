@@ -102,7 +102,7 @@ For typical use you will need to define a file looking like this:
 ```yaml
 #config/packages/cache_pool/cache.redis.yaml
 parameters:
-    cache_dsn: '%env(CACHE_DSN)%'
+    cache_dsn: 'redis://%env(CACHE_DSN)%'
 
 services:
     cache.redis:
