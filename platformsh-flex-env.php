@@ -303,6 +303,7 @@ function mapPlatformShElasticSearch(string $relationshipName, Config $config): v
 
     setEnvVar('ELASTICSEARCH_HOST', $credentials['host']);
     setEnvVar('ELASTICSEARCH_PORT', (string)$credentials['port']);
+    setEnvVar('ELASTICSEARCH_URL', sprintf('http://%s:%s', $credentials['host'], (string) $credentials['port']));
 }
 
 /**
@@ -320,7 +321,7 @@ function mapPlatformShSolr(string $relationshipName, Config $config): void
     $credentials = $config->credentials($relationshipName);
 
     setEnvVar('SOLR_DSN', sprintf('http://%s:%d/solr', $credentials['host'], $credentials['port']));
-    
+
     if(isset($credentials['rel'])) {
         setEnvVar('SOLR_CORE', $credentials['rel']);
     } else {
@@ -344,6 +345,7 @@ function mapPlatformShRedisSession(string $relationshipName, Config $config): vo
 
     setEnvVar('SESSION_REDIS_HOST', $credentials['host']);
     setEnvVar('SESSION_REDIS_PORT', (string)$credentials['port']);
+    setEnvVar('SESSION_REDIS_URL', sprintf('redis://%s:%s', $credentials['host'], (string) $credentials['port']));
 }
 
 /**
@@ -361,4 +363,5 @@ function mapPlatformShRedisCache(string $relationshipName, Config $config): void
     $credentials = $config->credentials($relationshipName);
 
     setEnvVar('CACHE_DSN', sprintf('%s:%d', $credentials['host'], $credentials['port']));
+    setEnvVar('CACHE_URL', sprintf('redis://%s:%s', $credentials['host'], (string) $credentials['port']));
 }

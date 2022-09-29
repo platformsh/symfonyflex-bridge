@@ -20,7 +20,7 @@ class FlexBridgeRedisCacheTest extends TestCase
         $this->relationships = [
             "rediscache" => [
                 [
-                    
+
                     "service" => 'rediscache',
                     "ip" => "203.0.113.0",
                     "cluster" => "someCluster",
@@ -28,7 +28,7 @@ class FlexBridgeRedisCacheTest extends TestCase
                     "rel" => "rediscache",
                     "scheme" => "redis",
                     "port" => 6379
-                    
+
                 ]
             ]
         ];
@@ -40,6 +40,7 @@ class FlexBridgeRedisCacheTest extends TestCase
         mapPlatformShEnvironment();
 
         $this->assertArrayNotHasKey('CACHE_DSN', $_SERVER);
+        $this->assertArrayNotHasKey('CACHE_URL', $_SERVER);
     }
 
     public function testNoRedisRelationship(): void
@@ -56,6 +57,7 @@ class FlexBridgeRedisCacheTest extends TestCase
         mapPlatformShEnvironment();
 
         $this->assertArrayNotHasKey('CACHE_DSN', $_SERVER);
+        $this->assertArrayNotHasKey('CACHE_URL', $_SERVER);
         $this->assertArrayNotHasKey('SESSION_REDIS_HOST', $_SERVER);
         $this->assertArrayNotHasKey('SESSION_REDIS_PORT', $_SERVER);
     }
@@ -73,5 +75,6 @@ class FlexBridgeRedisCacheTest extends TestCase
         mapPlatformShEnvironment();
 
         $this->assertEquals('rediscache.internal:6379', $_SERVER['CACHE_DSN']);
+        $this->assertEquals('redis://rediscache.internal:6379', $_SERVER['CACHE_URL']);
     }
 }

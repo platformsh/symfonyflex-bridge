@@ -40,6 +40,7 @@ class FlexBridgeElasticsearchTest extends TestCase
 
         $this->assertArrayNotHasKey('ELASTICSEARCH_HOST', $_SERVER);
         $this->assertArrayNotHasKey('ELASTICSEARCH_PORT', $_SERVER);
+        $this->assertArrayNotHasKey('ELASTICSEARCH_URL', $_SERVER);
     }
 
     public function testNoElasticsearchRelationship(): void
@@ -58,6 +59,7 @@ class FlexBridgeElasticsearchTest extends TestCase
 
         $this->assertArrayNotHasKey('ELASTICSEARCH_HOST', $_SERVER);
         $this->assertArrayNotHasKey('ELASTICSEARCH_PORT', $_SERVER);
+        $this->assertArrayNotHasKey('ELASTICSEARCH_URL', $_SERVER);
     }
 
     public function testElasticsearchRelationshipSet(): void
@@ -72,5 +74,6 @@ class FlexBridgeElasticsearchTest extends TestCase
 
         $this->assertEquals('elasticsearch.internal', $_SERVER['ELASTICSEARCH_HOST']);
         $this->assertEquals(80, $_SERVER['ELASTICSEARCH_PORT']);
+        $this->assertEquals('http://elasticsearch.internal:80', $_SERVER['ELASTICSEARCH_URL']);
     }
 }
