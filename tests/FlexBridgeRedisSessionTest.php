@@ -20,7 +20,7 @@ class FlexBridgeSessionTest extends TestCase
         $this->relationships = [
             "redissession" => [
                 [
-                    
+
                     "service" => 'redissession',
                     "ip" => "203.0.113.0",
                     "cluster" => "someCluster",
@@ -28,7 +28,7 @@ class FlexBridgeSessionTest extends TestCase
                     "rel" => "redissession",
                     "scheme" => "redis",
                     "port" => 6379
-                    
+
                 ]
             ]
         ];
@@ -41,6 +41,7 @@ class FlexBridgeSessionTest extends TestCase
 
         $this->assertArrayNotHasKey('SESSION_REDIS_HOST', $_SERVER);
         $this->assertArrayNotHasKey('SESSION_REDIS_PORT', $_SERVER);
+        $this->assertArrayNotHasKey('SESSION_REDIS_URL', $_SERVER);
     }
 
     public function testNoRedisRelationship(): void
@@ -58,6 +59,7 @@ class FlexBridgeSessionTest extends TestCase
 
         $this->assertArrayNotHasKey('SESSION_REDIS_HOST', $_SERVER);
         $this->assertArrayNotHasKey('SESSION_REDIS_PORT', $_SERVER);
+        $this->assertArrayNotHasKey('SESSION_REDIS_URL', $_SERVER);
     }
 
     public function testRelationshipSession(): void
@@ -74,5 +76,6 @@ class FlexBridgeSessionTest extends TestCase
 
         $this->assertEquals('redissession.internal', $_SERVER['SESSION_REDIS_HOST']);
         $this->assertEquals('6379', $_SERVER['SESSION_REDIS_PORT']);
+        $this->assertEquals('redis://redissession.internal:6379', $_SERVER['SESSION_REDIS_URL']);
     }
 }
