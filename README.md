@@ -1,3 +1,5 @@
+> **Archived template:** This Symfony 5 template has been archived, and will no longer receive updates from our upstream maintenance tooling. Users should consult the new and official [Platform.sh template provided from Symfony](https://github.com/symfonycorp/platformsh-symfony-template). 
+> 
 # Symfony Flex bridge for Platform.sh
 
 This simple bridge library connects a Symfony Flex-based application to [Platform.sh](https://platform.sh/).  In the typical case it should be completely fire-and-forget.
