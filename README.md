@@ -1,5 +1,5 @@
-> **Archived library:** This Symfony Flex Bridge has been archived and is no longer the recommended tool for deployment. Users should consult the new and official [Platform.sh template provided from Symfony](https://github.com/symfonycorp/platformsh-symfony-template) and its use of Configurator. 
-> 
+> **Archived library:** The Symfony Flex Bridge has been archived and is no longer the recommended tool for deployment on Platform.sh. Users should consult the new and official [Platform.sh template provided from Symfony](https://github.com/symfonycorp/platformsh-symfony-template) and its use of the [Symfony configurator script](https://symfony.com/doc/current/cloud/config.html). 
+
 # Symfony Flex bridge for Platform.sh
 
 This simple bridge library connects a Symfony Flex-based application to [Platform.sh](https://platform.sh/).  In the typical case it should be completely fire-and-forget.
