@@ -1,4 +1,4 @@
-> **Archived template:** This Symfony Flex Bridge template has been archived, and will no longer receive updates from our upstream maintenance tooling. Users should consult the new and official [Platform.sh template provided from Symfony](https://github.com/symfonycorp/platformsh-symfony-template). 
+> **Archived template:** This Symfony Flex Bridge has been archived and is no longer the recommended tool for deployment. Users should consult the new and official [Platform.sh template provided from Symfony](https://github.com/symfonycorp/platformsh-symfony-template) and its use of Configurator. 
 > 
 # Symfony Flex bridge for Platform.sh
 
